@@ -1,0 +1,28 @@
+# Core
+numpy>=1.26
+pandas>=2.1
+pyarrow>=15.0
+scikit-learn>=1.4
+lightgbm>=4.3
+shap>=0.44
+
+# Optimiser
+pulp>=2.8
+ortools>=9.9
+deap>=1.4
+
+# Explainer / RAG
+sentence-transformers>=2.6
+anthropic>=0.39
+# ragas is optional and heavy; import guarded in eval/ragas_eval.py
+# ragas>=0.1.7
+
+# App
+streamlit>=1.33
+
+# Governance / tracking
+mlflow>=2.12
+
+# Utilities
+matplotlib>=3.8
+pytest>=8.0

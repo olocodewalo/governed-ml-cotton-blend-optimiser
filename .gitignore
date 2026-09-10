@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+data/*.parquet
+artifacts/
+mlruns/
+*.sqlite
+*.db
+.streamlit/secrets.toml
+.env
+docs/shap_summary.png
+.pytest_cache/
+eval/latest_metrics.json
+data/manifest.json

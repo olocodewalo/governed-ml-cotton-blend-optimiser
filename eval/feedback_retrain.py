@@ -91,13 +91,13 @@ def main() -> None:
     easy = pd.concat([low, hard.sample(frac=0.12, random_state=1)], ignore_index=True)
 
     before_model = QualityModel(version="before_feedback").fit(*build_xy(easy, bales))
-    before = _flat(run_all(before_model))
+    before = _flat(run_all(before_model, include_optimiser=False))
     before_hard = _slice_mae(before_model, hard_test, bales)
 
     corr = simulate_master_corrections(hard, bales)
     tr_plus = pd.concat([easy, corr], ignore_index=True)
     after_model = QualityModel(version="after_feedback").fit(*build_xy(tr_plus, bales))
-    after = _flat(run_all(after_model))
+    after = _flat(run_all(after_model, include_optimiser=False))
     after_hard = _slice_mae(after_model, hard_test, bales)
 
     delta = {k: round(after[k] - before[k], 4) for k in before}

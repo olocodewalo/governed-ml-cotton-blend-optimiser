@@ -70,3 +70,13 @@ def record_outcome(decision_id: int, qc: dict, note: str = "") -> None:
     with _conn() as c:
         c.execute("UPDATE decisions SET outcome_qc_json=?, outcome_note=? WHERE id=?",
                   (json.dumps(qc), note, decision_id))
+
+
+def count_actions(action: str, model_version: str | None = None) -> int:
+    """How many decisions of one kind (e.g. 'adjust') -- a retrain trigger input."""
+    sql, args = "SELECT COUNT(*) FROM decisions WHERE user_action=?", [action]
+    if model_version:
+        sql += " AND model_version=?"
+        args.append(model_version)
+    with _conn() as c:
+        return int(c.execute(sql, args).fetchone()[0])

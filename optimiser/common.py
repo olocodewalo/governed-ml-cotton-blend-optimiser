@@ -10,10 +10,16 @@ from config import (ARTIFACTS_DIR, LTB_MICRONAIRE_TOL, LTB_STRENGTH_TOL,
                     MAX_BALES_IN_LAYDOWN, QUALITY_TARGETS, RANDOM_SEED,
                     ROLLING_WINDOW, YARN_COUNT_SPECS)
 from data.features import blend_profile, feature_columns
+from models import registry
 from models.dataset import build_xy, load_bales, load_laydowns
 from models.quality_model import QualityModel
+from optimiser.guards import check_price_freshness, origin_cap_violations, origin_caps
 
 CURRENT_MODEL = ARTIFACTS_DIR / "quality_model_current.joblib"
+
+
+class NoApprovedModelError(FileNotFoundError):
+    """No model has been promoted to approved yet."""
 
 
 @dataclass
@@ -25,6 +31,21 @@ class Scenario:
     max_bales: int = MAX_BALES_IN_LAYDOWN
     mic_tol: float = LTB_MICRONAIRE_TOL
     strength_tol: float = LTB_STRENGTH_TOL
+    as_of: pd.Timestamp | None = None     # planning date; None = newest price date in inventory
+    origin_caps: dict = field(default_factory=origin_caps)
+
+    @property
+    def planning_date(self) -> pd.Timestamp | None:
+        if self.as_of is not None:
+            return pd.Timestamp(self.as_of)
+        if "price_as_of" in self.inventory:
+            return pd.to_datetime(self.inventory["price_as_of"]).max()
+        return None
+
+
+def validate_scenario(scenario: Scenario) -> None:
+    """Guards every optimiser runs first. Raises ``StalePriceError``."""
+    check_price_freshness(scenario.inventory, scenario.planning_date)
 
 
 @dataclass
@@ -56,7 +77,20 @@ class BlendResult:
 
 
 def load_current_model() -> QualityModel:
+    """The approved model -- the only one allowed to drive a recommendation."""
+    if not CURRENT_MODEL.exists():
+        raise NoApprovedModelError(
+            "no approved quality model yet: run `make train`, `make eval`, then "
+            "`make promote APPROVER=\"<name>\"` (see docs/model_governance_policy.md)")
     return QualityModel.load(CURRENT_MODEL)
+
+
+def load_model(version: str | None = None) -> QualityModel:
+    """Any registered model (candidate or approved); latest registered by default."""
+    entry = registry.get(version) if version else registry.latest()
+    if entry is None:
+        raise FileNotFoundError("model registry is empty -- run `make train`")
+    return QualityModel.load(registry.artifact_abspath(entry))
 
 
 def rolling_profile(laydowns: pd.DataFrame | None = None, bales: pd.DataFrame | None = None,
@@ -69,11 +103,13 @@ def rolling_profile(laydowns: pd.DataFrame | None = None, bales: pd.DataFrame | 
 
 
 def make_scenario(target_count: str = "40s_Ne", inventory_size: int = 120,
-                  seed: int = RANDOM_SEED, bias: str | None = None) -> Scenario:
+                  seed: int = RANDOM_SEED, bias: str | None = None,
+                  as_of=None) -> Scenario:
     """Build a weekly scenario: sample an inventory of bales available to blend.
 
     ``bias`` optionally skews the inventory ('cheap' or 'premium') to make the
-    cost/quality trade-off sharper for demos.
+    cost/quality trade-off sharper for demos. ``as_of`` is the planning date the
+    price-freshness guard checks against.
     """
     bales = load_bales()
     rng = np.random.default_rng(seed)
@@ -91,6 +127,7 @@ def make_scenario(target_count: str = "40s_Ne", inventory_size: int = 120,
         inventory=inv,
         rolling_profile=rolling_profile(bales=bales),
         spec=dict(YARN_COUNT_SPECS[target_count]),
+        as_of=None if as_of is None else pd.Timestamp(as_of),
     )
 
 
@@ -153,6 +190,7 @@ def _binding_constraints(scenario: Scenario, prof: dict, predicted: dict,
         out.append(f"VIOLATED long-term-blend strength drift: {d_str:.2f} > {scenario.strength_tol}")
     elif d_str >= scenario.strength_tol * 0.9:
         out.append(f"binding long-term-blend strength drift: {d_str:.2f}")
+    out += origin_cap_violations(prof, scenario.origin_caps)
     return out
 
 

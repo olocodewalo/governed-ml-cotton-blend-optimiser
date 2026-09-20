@@ -70,9 +70,9 @@ def main() -> None:
     metrics = _metrics(y_te, pred_te)
 
     artifact_path = ARTIFACTS_DIR / f"quality_model_{version}.joblib"
+    # Only the versioned artifact. The "current" pointer used by the app and
+    # optimiser moves on promotion (models.promote), never on training.
     model.save(artifact_path)
-    # also save/refresh the "current" pointer used by app + optimiser + eval
-    model.save(ARTIFACTS_DIR / "quality_model_current.joblib")
 
     DOCS_DIR.mkdir(exist_ok=True)
     have_shap = _shap_chart(model, X_te, DOCS_DIR / "shap_summary.png")
@@ -85,7 +85,7 @@ def main() -> None:
         metrics=metrics,
         n_train=len(X_tr),
         n_test=len(X_te),
-        notes="LightGBM mean + P10/P90 quantile heads; chronological split.",
+        notes="LightGBM mean + P10/P90 quantile heads, 5-fold CQR calibrated; chronological split.",
     )
 
     # optional MLflow logging
@@ -102,6 +102,8 @@ def main() -> None:
 
     print(json.dumps(dict(version=version, metrics=metrics,
                           shap_chart=have_shap, registry_status=entry["status"]), indent=2))
+    print(f"\n{version} registered as a CANDIDATE. Next: `make eval` (golden set + policy "
+          f"thresholds), then `make promote APPROVER=\"<name>\"`.")
 
 
 if __name__ == "__main__":

@@ -9,11 +9,13 @@ import json
 
 from config import QUALITY_TARGETS
 from optimiser.common import load_current_model, make_scenario, naive_baseline
+from optimiser.confidence import assess
 from optimiser.ga import solve_ga
 from optimiser.lp import solve_lp
 
 
-def _summary(res, spec):
+def _summary(res, spec, model):
+    conf = assess(res, spec, model)
     return dict(
         method=res.method,
         price_inr_per_kg=res.price_inr_per_kg,
@@ -22,6 +24,8 @@ def _summary(res, spec):
         n_bales=int(sum(1 for w in res.weights if w > 1e-4)),
         predicted={t: {k: round(v, 1) for k, v in res.predicted[t].items()} for t in QUALITY_TARGETS},
         binding=res.binding_constraints,
+        confidence=conf.level,
+        confidence_reasons=conf.reasons,
         note=res.note,
     )
 
@@ -41,11 +45,11 @@ def main() -> None:
     base = naive_baseline(scenario, model)
     lp = solve_lp(scenario, model)
     out = {"target_count": args.count, "spec": spec,
-           "naive_baseline": _summary(base, spec), "lp": _summary(lp, spec)}
+           "naive_baseline": _summary(base, spec, model), "lp": _summary(lp, spec, model)}
 
     if not args.skip_ga:
         ga = solve_ga(scenario, model)
-        out["ga"] = _summary(ga, spec)
+        out["ga"] = _summary(ga, spec, model)
         out["ga_vs_naive_saving_pct"] = round(
             100 * (base.price_inr_per_kg - ga.price_inr_per_kg) / base.price_inr_per_kg, 2)
 

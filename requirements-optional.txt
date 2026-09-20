@@ -1,0 +1,10 @@
+# Optional extras. Every import is guarded; the pipeline runs without them.
+
+# Semantic retriever for the explainer (pulls in torch; TF-IDF fallback otherwise)
+sentence-transformers>=2.6
+
+# Experiment tracking alongside the JSON model registry
+mlflow>=2.12
+
+# RAG faithfulness / relevance with a real LLM judge (eval/ragas_eval.py; proxy otherwise)
+# ragas>=0.1.7

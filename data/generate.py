@@ -41,6 +41,11 @@ ORIGIN_PROFILE = {
 
 COLOUR_GRADES = ["31", "32", "41", "42", "51"]  # Middling .. Strict Low Middling
 
+# Date of the current procurement price sheet. Lots are re-quoted on a rolling
+# basis, so each lot's price is 0-4 days older than the sheet (deterministic, so
+# the RNG stream -- and every other generated value -- is unchanged).
+PRICE_SHEET_DATE = np.datetime64("2024-12-06")
+
 
 def _clip(x, lo, hi):
     return np.clip(x, lo, hi)
@@ -87,6 +92,7 @@ def generate_bales(rng: np.random.Generator) -> pd.DataFrame:
             colour_grade=rng.choice(COLOUR_GRADES, p=[0.28, 0.30, 0.22, 0.12, 0.08]),
             weight_kg=round(float(rng.normal(220, 8)), 1),
             price_inr_per_kg=round(float(_clip(price, 140.0, 340.0)), 2),
+            price_as_of=str(PRICE_SHEET_DATE - np.timedelta64((i // 12) % 5, "D")),
         ))
     return pd.DataFrame(rows)
 

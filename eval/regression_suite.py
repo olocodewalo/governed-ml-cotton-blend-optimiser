@@ -10,6 +10,8 @@ import json
 import sys
 from pathlib import Path
 
+from eval.policy import get_path
+
 HERE = Path(__file__).parent
 BASELINE = HERE / "baseline.json"
 LATEST = HERE / "latest_metrics.json"
@@ -30,10 +32,33 @@ CHECKS = {
 }
 
 
-def _get(d: dict, path: str):
-    for p in path.split("."):
-        d = d[p]
-    return d
+def compare(base: dict, latest: dict, checks: dict | None = None) -> list[dict]:
+    """One row per tracked metric: baseline, latest, regressed flag.
+
+    A metric missing from the baseline (newly tracked) is reported, not failed.
+    """
+    checks = CHECKS if checks is None else checks
+    rows = []
+    for path, (direction, tol) in checks.items():
+        l = get_path(latest, path)
+        try:
+            b = get_path(base, path)
+        except KeyError:
+            rows.append(dict(metric=path, baseline=None, latest=l, regressed=False))
+            continue
+        regressed = l > b + tol if direction == "lower" else l < b - tol
+        rows.append(dict(metric=path, baseline=b, latest=l, regressed=regressed))
+    return rows
+
+
+def print_rows(rows: list[dict]) -> None:
+    print(f"{'metric':<48} {'baseline':>12} {'latest':>12}  verdict")
+    print("-" * 90)
+    for r in rows:
+        b = "new" if r["baseline"] is None else f"{r['baseline']:.3f}"
+        verdict = "REGRESSED" if r["regressed"] else "ok"
+        print(f"{r['metric']:<48} {b:>12} {r['latest']:>12.3f}  {verdict}")
+    print("-" * 90)
 
 
 def main() -> None:
@@ -46,24 +71,13 @@ def main() -> None:
 
     base = json.loads(BASELINE.read_text())
     latest = json.loads(LATEST.read_text())
+    rows = compare(base, latest)
+    print(f"baseline model {base.get('model_version')} vs latest model {latest.get('model_version')}")
+    print_rows(rows)
 
-    failures = []
-    print(f"{'metric':<48} {'baseline':>12} {'latest':>12}  verdict")
-    print("-" * 90)
-    for path, (direction, tol) in CHECKS.items():
-        b, l = _get(base, path), _get(latest, path)
-        if direction == "lower":
-            regressed = l > b + tol
-        else:
-            regressed = l < b - tol
-        verdict = "REGRESSED" if regressed else "ok"
-        if regressed:
-            failures.append(path)
-        print(f"{path:<48} {b:>12.3f} {l:>12.3f}  {verdict}")
-
-    print("-" * 90)
-    if failures:
-        print(f"FAIL: {len(failures)} metric(s) regressed: {', '.join(failures)}")
+    failed = [r["metric"] for r in rows if r["regressed"]]
+    if failed:
+        print(f"FAIL: {len(failed)} metric(s) regressed: {', '.join(failed)}")
         sys.exit(1)
     print("PASS: no regressions")
 

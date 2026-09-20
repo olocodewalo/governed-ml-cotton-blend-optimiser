@@ -18,13 +18,16 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from config import QUALITY_TARGETS, YARN_COUNT_SPECS, anthropic_key
+from config import ORIGIN_MAX_FRACTION, PRICE_MAX_AGE_DAYS, QUALITY_TARGETS, YARN_COUNT_SPECS, anthropic_key
 from app.decisions_db import log_decision, recent
 from explainer.generate import explain_blend
 from models import registry
-from optimiser.common import (evaluate_blend, load_current_model, make_scenario,
-                              naive_baseline)
+from models.dataset import load_bales
+from optimiser.common import (NoApprovedModelError, evaluate_blend, load_current_model,
+                              make_scenario, naive_baseline)
+from optimiser.confidence import assess
 from optimiser.ga import solve_ga
+from optimiser.guards import StalePriceError, price_age_days
 from optimiser.lp import solve_lp
 
 st.set_page_config(page_title="Cotton Blend Optimiser -- HITL Review", layout="wide")
@@ -35,17 +38,9 @@ def _model():
     return load_current_model()
 
 
-def _confidence(result, spec) -> tuple[str, str]:
-    """Simple confidence policy from PI width + margin to the spec."""
-    csp = result.predicted["csp"]
-    width = csp["p90"] - csp["p10"]
-    margin = csp["mean"] - spec["min_csp"]
-    p10_clears = csp["p10"] >= spec["min_csp"]
-    if result.in_band and p10_clears and width < 250:
-        return "HIGH", "P10 clears the CSP floor and the band is tight -- eligible for auto-suggest."
-    if result.in_band and margin > 0:
-        return "MEDIUM", "Mean is in band but P10 is close to a limit -- master review required."
-    return "LOW", "Predicted quality is at or outside a spec limit -- do not run without a master decision."
+@st.cache_data
+def _price_sheet_date():
+    return pd.to_datetime(load_bales()["price_as_of"]).max().date()
 
 
 def _quality_table(result, spec):
@@ -65,9 +60,15 @@ def _quality_table(result, spec):
 
 st.title("Cotton Blend Optimisation -- Human-in-the-Loop Review")
 
-reg = registry.latest()
-mv = reg["version"] if reg else "none"
-st.caption(f"quality model **{mv}** ({'approved' if reg and reg['status']=='approved' else 'candidate'}) "
+try:
+    model = _model()
+except NoApprovedModelError as e:
+    st.error(str(e))
+    st.stop()
+
+entry = registry.get(model.version)
+st.caption(f"quality model **{model.version}** ({entry['status']}"
+           f"{', approved by ' + entry['approved_by'] if entry.get('approved_by') else ''}) "
            f"| LLM: {'Anthropic API' if anthropic_key() else 'templated fallback (no ANTHROPIC_API_KEY)'}")
 
 with st.sidebar:
@@ -76,26 +77,36 @@ with st.sidebar:
     inv_size = st.slider("Bale inventory available", 60, 300, 120, 10)
     bias = st.selectbox("Inventory skew", ["none", "cheap", "premium"], index=0)
     seed = st.number_input("Scenario seed", value=20260910, step=1)
+    plan_date = st.date_input("Planning date", value=_price_sheet_date(),
+                              help=f"The optimiser refuses to run on prices older than "
+                                   f"{PRICE_MAX_AGE_DAYS} days at this date.")
     method = st.radio("Optimiser", ["LP (PuLP + linear surrogate)", "GA (DEAP + full ML model)"])
     run = st.button("Run optimiser", type="primary")
     st.divider()
     spec = YARN_COUNT_SPECS[count]
     st.write("**Spec band**")
     st.json(spec)
+    st.write("**Origin caps (contamination)**")
+    st.json(ORIGIN_MAX_FRACTION)
 
 if run:
-    model = _model()
-    scenario = make_scenario(count, inventory_size=int(inv_size),
-                             seed=int(seed), bias=None if bias == "none" else bias)
-    with st.spinner("optimising..."):
-        baseline = naive_baseline(scenario, model)
-        if method.startswith("LP"):
-            result = solve_lp(scenario, model)
-        else:
-            result = solve_ga(scenario, model)
-        explanation = explain_blend(scenario, result, baseline)
+    scenario = make_scenario(count, inventory_size=int(inv_size), seed=int(seed),
+                             bias=None if bias == "none" else bias, as_of=pd.Timestamp(plan_date))
+    try:
+        with st.spinner("optimising..."):
+            baseline = naive_baseline(scenario, model)
+            if method.startswith("LP"):
+                result = solve_lp(scenario, model)
+            else:
+                result = solve_ga(scenario, model)
+            explanation = explain_blend(scenario, result, baseline)
+    except StalePriceError as e:
+        st.session_state.pop("result", None)
+        st.error(f"Refusing to optimise: {e}")
+        st.stop()
     st.session_state.update(scenario=scenario, result=result, baseline=baseline,
                             explanation=explanation, model_version=model.version)
+    st.session_state.pop("rescored", None)
 
 if "result" in st.session_state:
     scenario = st.session_state["scenario"]
@@ -104,15 +115,18 @@ if "result" in st.session_state:
     explanation = st.session_state["explanation"]
     spec = scenario.spec
 
-    conf, conf_why = _confidence(result, spec)
+    conf = assess(result, spec, model)
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Blend cost", f"₹{result.price_inr_per_kg:.1f}/kg",
               f"{result.price_inr_per_kg - baseline.price_inr_per_kg:+.1f} vs naive")
     saving = 100 * (baseline.price_inr_per_kg - result.price_inr_per_kg) / baseline.price_inr_per_kg
     c2.metric("Saving vs naive baseline", f"{saving:.1f}%")
     c3.metric("In spec band?", "YES" if result.in_band else "NO")
-    c4.metric("Confidence", conf)
-    st.caption(conf_why)
+    c4.metric("Confidence", conf.level)
+    (st.success if conf.level == "HIGH" else st.warning if conf.level == "MEDIUM" else st.error)(conf.summary)
+    ages = price_age_days(scenario.inventory, scenario.planning_date)
+    st.caption(f"planning date {scenario.planning_date.date()} · bale prices {int(ages.min())}-"
+               f"{int(ages.max())} days old (limit {PRICE_MAX_AGE_DAYS})")
     if not result.feasible:
         st.error(result.note)
 
@@ -145,6 +159,8 @@ if "result" in st.session_state:
                  rolling=round(rp["w_mean_staple_length_mm"], 2), limit="-"),
             dict(property="SFC %", blend=round(prof["w_mean_short_fibre_content_pct"], 2),
                  rolling=round(rp["w_mean_short_fibre_content_pct"], 2), limit="-"),
+            dict(property="effective bales", blend=round(prof["n_bales_effective"], 1),
+                 rolling=round(rp["n_bales_effective"], 1), limit="-"),
         ]), use_container_width=True)
 
     st.divider()
@@ -161,17 +177,18 @@ if "result" in st.session_state:
         if st.button("Re-score edited blend"):
             inv = scenario.inventory
             w = np.zeros(len(inv))
-            idx = inv.set_index("bale_id")
             for _, r in edited_df.iterrows():
                 pos = inv.index[inv["bale_id"] == r["bale_id"]]
                 if len(pos):
                     w[pos[0]] = max(float(r["weight_pct"]), 0.0)
             if w.sum() > 0:
-                rescored = evaluate_blend(scenario, w, _model(), "master_adjusted")
+                rescored = evaluate_blend(scenario, w, model, "master_adjusted")
                 st.session_state["rescored"] = rescored
         if "rescored" in st.session_state:
             rs = st.session_state["rescored"]
-            st.write(f"Re-scored cost: ₹{rs.price_inr_per_kg:.1f}/kg · in band: {rs.in_band}")
+            rs_conf = assess(rs, spec, model)
+            st.write(f"Re-scored cost: ₹{rs.price_inr_per_kg:.1f}/kg · in band: {rs.in_band} · "
+                     f"confidence: {rs_conf.level}")
             st.dataframe(_quality_table(rs, spec), use_container_width=True)
             edited = {b: w for b, w in zip(rs.bale_ids, rs.weights) if w > 1e-4}
 
@@ -181,7 +198,11 @@ if "result" in st.session_state:
         rec = {b: w for b, w in zip(result.bale_ids, result.weights) if w > 1e-4}
         did = log_decision(
             scenario=dict(target_count=scenario.target_count, spec=spec,
-                          inventory_size=len(scenario.inventory)),
+                          inventory_size=len(scenario.inventory),
+                          planning_date=str(scenario.planning_date.date()),
+                          origin_caps=scenario.origin_caps,
+                          confidence=conf.level, confidence_reasons=conf.reasons,
+                          support_ratio=conf.support_ratio),
             model_version=st.session_state["model_version"],
             method=result.method,
             recommendation=rec,

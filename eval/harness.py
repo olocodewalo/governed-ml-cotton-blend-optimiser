@@ -6,6 +6,8 @@ Three questions, on data the model never trained on:
      spec, does the ground-truth physics agree? (false-accept rate)
   3. Optimiser value             -- rebuild each golden laydown's choice set,
      run the LP, and compare its cost + true quality to the historical actual.
+     Every golden laydown is a scenario; savings and rates carry 95% intervals
+     so a small-sample number is not over-read.
 """
 from __future__ import annotations
 
@@ -13,10 +15,9 @@ import numpy as np
 import pandas as pd
 
 from config import QUALITY_TARGETS, YARN_COUNT_SPECS
-from data.features import blend_profile, feature_columns
 from data.quality_physics import predict_quality
 from models.dataset import build_xy, load_bales, load_laydowns
-from optimiser.common import Scenario, evaluate_blend, rolling_profile
+from optimiser.common import Scenario, rolling_profile
 from optimiser.lp import solve_lp
 from optimiser.surrogate import LinearSurrogate
 
@@ -34,6 +35,26 @@ def _in_band(q: dict, spec: dict) -> bool:
             and q["ends_down"] <= spec["max_ends_down"])
 
 
+def bootstrap_mean_ci(values, n_boot: int = 2000, level: float = 0.95, seed: int = 0):
+    v = np.asarray(values, dtype=float)
+    if len(v) < 2:
+        return [None, None]
+    rng = np.random.default_rng(seed)
+    means = rng.choice(v, size=(n_boot, len(v)), replace=True).mean(axis=1)
+    a = (1 - level) / 2
+    return [round(float(np.quantile(means, a)), 2), round(float(np.quantile(means, 1 - a)), 2)]
+
+
+def wilson_ci(successes: int, n: int, z: float = 1.96):
+    if n == 0:
+        return [None, None]
+    p = successes / n
+    denom = 1 + z ** 2 / n
+    centre = (p + z ** 2 / (2 * n)) / denom
+    half = z * np.sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2)) / denom
+    return [round(float(centre - half), 3), round(float(centre + half), 3)]
+
+
 def quality_metrics(model, golden: pd.DataFrame, bales: pd.DataFrame) -> dict:
     X, y = build_xy(golden, bales)
     pred = model.predict(X)
@@ -44,7 +65,8 @@ def quality_metrics(model, golden: pd.DataFrame, bales: pd.DataFrame) -> dict:
                   & (y[t].to_numpy() <= pred[f"{t}_p90"].to_numpy()))
         out[t] = dict(mae=round(float(np.mean(np.abs(err))), 3),
                       rmse=round(float(np.sqrt(np.mean(err ** 2))), 3),
-                      pi_coverage=round(float(np.mean(inside)), 3))
+                      pi_coverage=round(float(np.mean(inside)), 3),
+                      pi_coverage_ci95=wilson_ci(int(inside.sum()), len(inside)))
     return out
 
 
@@ -64,18 +86,20 @@ def decision_metrics(model, golden: pd.DataFrame, bales: pd.DataFrame) -> dict:
         false_reject += (t_ok and not m_ok)
     return dict(n=n, agreement=round(agree / n, 3),
                 false_accept_rate=round(false_accept / n, 3),
+                false_accept_ci95=wilson_ci(false_accept, n),
                 false_reject_rate=round(false_reject / n, 3))
 
 
 def optimiser_value(model, golden: pd.DataFrame, bales: pd.DataFrame,
-                    sample: int = 15, extra_bales: int = 90, seed: int = 7) -> dict:
+                    sample: int | None = None, extra_bales: int = 90, seed: int = 7) -> dict:
     surrogate = LinearSurrogate.fit()
     rp = rolling_profile(bales=bales)
     rng = np.random.default_rng(seed)
     bby_id = bales.set_index("bale_id")
-    rows = golden.sample(min(sample, len(golden)), random_state=seed)
+    rows = golden if sample is None else golden.sample(min(sample, len(golden)), random_state=seed)
+    has_support = bool(getattr(model, "train_ref_", None))
 
-    savings, matched_savings, in_band_flags, hist_in_band = [], [], [], []
+    savings, matched_savings, in_band_flags, hist_in_band, in_support = [], [], [], [], []
     for r in rows.itertuples(index=False):
         used = list(r.bale_ids)
         others = bales[~bales["bale_id"].isin(used)].sample(extra_bales, random_state=int(rng.integers(1e6)))
@@ -94,6 +118,9 @@ def optimiser_value(model, golden: pd.DataFrame, bales: pd.DataFrame,
             savings.append(100 * (r.blend_price_inr_per_kg - res.price_inr_per_kg) / r.blend_price_inr_per_kg)
             in_band_flags.append(opt_ok)
             hist_in_band.append(hist_ok)
+            if has_support:
+                row = pd.DataFrame([res.profile], columns=model.features)
+                in_support.append(bool(model.support_ratio(row)[0] <= 1.0))
 
         # like-for-like: require the optimiser to at least match the historical
         # blend's OWN quality on every axis (the credible "saving at equal quality")
@@ -109,25 +136,32 @@ def optimiser_value(model, golden: pd.DataFrame, bales: pd.DataFrame,
                 matched_savings.append(100 * (r.blend_price_inr_per_kg - res2.price_inr_per_kg)
                                        / r.blend_price_inr_per_kg)
 
-    savings = np.array(savings) if savings else np.array([0.0])
+    savings_arr = np.array(savings) if savings else np.array([0.0])
     matched = np.array(matched_savings) if matched_savings else np.array([0.0])
+    n = len(in_band_flags)
     return dict(
-        n=len(in_band_flags),
-        mean_cost_saving_pct_vs_historical=round(float(np.mean(savings)), 2),
-        median_cost_saving_pct_vs_historical=round(float(np.median(savings)), 2),
+        n=n,
+        mean_cost_saving_pct_vs_historical=round(float(np.mean(savings_arr)), 2),
+        mean_cost_saving_pct_vs_historical_ci95=bootstrap_mean_ci(savings),
+        median_cost_saving_pct_vs_historical=round(float(np.median(savings_arr)), 2),
         mean_cost_saving_pct_at_matched_quality=round(float(np.mean(matched)), 2),
+        mean_cost_saving_pct_at_matched_quality_ci95=bootstrap_mean_ci(matched_savings),
         n_matched=len(matched_savings),
-        optimiser_blend_in_band_rate=round(float(np.mean(in_band_flags)) if in_band_flags else 0.0, 3),
+        optimiser_blend_in_band_rate=round(float(np.mean(in_band_flags)) if n else 0.0, 3),
+        optimiser_blend_in_band_ci95=wilson_ci(int(np.sum(in_band_flags)), n),
         historical_blend_in_band_rate=round(float(np.mean(hist_in_band)) if hist_in_band else 0.0, 3),
+        optimiser_blend_in_support_rate=(round(float(np.mean(in_support)), 3) if in_support else None),
     )
 
 
-def run_all(model) -> dict:
+def run_all(model, include_optimiser: bool = True) -> dict:
     bales = load_bales()
     golden = golden_laydowns()
-    return dict(
+    out = dict(
         golden_n=len(golden),
         quality=quality_metrics(model, golden, bales),
         decision=decision_metrics(model, golden, bales),
-        optimiser=optimiser_value(model, golden, bales),
     )
+    if include_optimiser:
+        out["optimiser"] = optimiser_value(model, golden, bales)
+    return out

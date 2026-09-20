@@ -12,6 +12,14 @@ s.t.       sum_i w_i = 1
            surrogate_ends(w)     <= max_ends   - margin
            |sum_i mic_i  w_i - rolling_mic| <= mic_tol
            |sum_i str_i  w_i - rolling_str| <= strength_tol
+           sum_{i in origin o} w_i <= origin_cap_o   (contamination-prone origins)
+
+LP blends still sit outside the historical training support (they concentrate
+on the cheapest bales far more than any past laydown). Tightening ``w_cap`` to
+0.06 was tried and rejected: on the 50 golden scenarios it cut the in-band rate
+from 0.90 to 0.82 and the matched-quality saving to ~0 while lifting in-support
+blends only to 8%. Instead, ``optimiser.confidence`` never rates an out-of-support
+blend HIGH, so the mixing master must review it.
 
 The linear surrogate under-models the non-linear variance penalties, so the LP
 is wrapped in a short adaptive loop: solve, re-score the blend with the full ML
@@ -24,7 +32,7 @@ import numpy as np
 import pulp
 
 from config import MIN_BALES_IN_LAYDOWN
-from optimiser.common import Scenario, evaluate_blend
+from optimiser.common import Scenario, evaluate_blend, validate_scenario
 from optimiser.surrogate import LinearSurrogate
 
 # Starting safety margins (absorb surrogate-vs-full-model gap). Sized from
@@ -68,6 +76,12 @@ def _build_and_solve(scenario, surrogate, mg, w_cap, w_floor, time_limit):
     prob += pulp.lpSum(stg[i] * w[i] for i in range(n)) <= rp["w_mean_strength_gtex"] + scenario.strength_tol
     prob += pulp.lpSum(stg[i] * w[i] for i in range(n)) >= rp["w_mean_strength_gtex"] - scenario.strength_tol
 
+    origin = inv["origin"].to_numpy()
+    for o, cap in scenario.origin_caps.items():
+        idx = np.flatnonzero(origin == o)
+        if len(idx):
+            prob += pulp.lpSum(w[i] for i in idx) <= cap
+
     status = prob.solve(pulp.PULP_CBC_CMD(msg=False, timeLimit=time_limit))
     return pulp.LpStatus[status], np.array([pulp.value(v) or 0.0 for v in w])
 
@@ -75,6 +89,7 @@ def _build_and_solve(scenario, surrogate, mg, w_cap, w_floor, time_limit):
 def solve_lp(scenario: Scenario, model, surrogate: LinearSurrogate | None = None,
              w_cap: float = 0.12, w_floor: float = 0.004, time_limit: int = 30,
              use_margin: bool = True, max_rounds: int = 4):
+    validate_scenario(scenario)
     surrogate = surrogate or LinearSurrogate.fit()
     mg = dict(_MARGIN0) if use_margin else {k: 0.0 for k in _MARGIN0}
 

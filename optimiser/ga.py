@@ -21,7 +21,8 @@ import pandas as pd
 
 from config import RANDOM_SEED
 from data.features import blend_profile, feature_columns
-from optimiser.common import Scenario, evaluate_blend
+from optimiser.common import Scenario, evaluate_blend, validate_scenario
+from optimiser.guards import origin_excess, origin_masks
 
 try:
     from deap import base, creator, tools
@@ -40,13 +41,16 @@ def _batch_penalised_cost(scenario: Scenario, weight_vectors: list[np.ndarray], 
     spec = scenario.spec
     rp = scenario.rolling_profile
 
-    profiles, prices, n_used = [], [], []
+    masks = origin_masks(inv, scenario.origin_caps)
+
+    profiles, prices, n_used, excess = [], [], [], []
     for wv in weight_vectors:
         w = np.asarray(wv, dtype=float)
         w = w / w.sum() if w.sum() > 0 else np.full(len(w), 1.0 / len(w))
         profiles.append(blend_profile(inv, w))
         prices.append(float(np.sum(price * w)))
         n_used.append(int((w > 1e-4).sum()))
+        excess.append(origin_excess(w, masks, scenario.origin_caps))
 
     X = pd.DataFrame(profiles, columns=feature_columns())
     pr = model.predict(X)
@@ -63,6 +67,7 @@ def _batch_penalised_cost(scenario: Scenario, weight_vectors: list[np.ndarray], 
     pen += np.maximum(0.0, np.abs(mic - rp["w_mean_micronaire"]) - scenario.mic_tol) * 8000.0
     pen += np.maximum(0.0, np.abs(stg - rp["w_mean_strength_gtex"]) - scenario.strength_tol) * 3000.0
     pen += np.maximum(0, np.array(n_used) - scenario.max_bales) * 200.0
+    pen += np.array(excess) * 3000.0
     return prices + pen
 
 
@@ -70,6 +75,7 @@ def solve_ga(scenario: Scenario, model, *, pop_size: int = 100, n_gen: int = 40,
              seed: int = RANDOM_SEED):
     if not _HAVE_DEAP:
         raise RuntimeError("deap not installed; `pip install deap`")
+    validate_scenario(scenario)
     rng = random.Random(seed)
     np_rng = np.random.default_rng(seed)
     n = len(scenario.inventory)

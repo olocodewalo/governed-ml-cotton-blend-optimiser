@@ -28,7 +28,7 @@ python docs/linkedin/set_links.py --check   # exits 1 if any placeholder is left
 | Carousel / document post | 300 pages; PDF or multi-image | Highest, and holds attention longest | The 10 slides |
 | **Article** | **~110,000 characters**, title 100 | Lower organic reach; found via profile, search and your own post | The full technical write-up |
 | Newsletter | Same editor as an article | Article reach **plus** a notification to subscribers | Same content, if you have newsletters enabled |
-| Comment | 1,250 characters each | Rides on the post | The depth, as a thread |
+| Comment | 1,250 characters each | Rides on the post | Answering questions, one at a time |
 
 **LinkedIn News is editorial — a member cannot post into it.** The formats above are all
 that is available to you.

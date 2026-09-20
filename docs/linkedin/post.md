@@ -8,8 +8,8 @@
    article.
 3. **Then the comment thread**, posted by you, immediately.
 
-Placeholders `XXXX-ARTICLE-LINK` and `XXXX-GITHUB-LINK` are everywhere a real URL goes.
-Fill them in one command once you have them:
+Any URL not yet known appears as an `XXXX-...-LINK` token (article, repo). Fill them in
+one command once you have them — the tokens themselves live in `set_links.py`:
 
 ```bash
 python docs/linkedin/set_links.py --repo https://github.com/you/repo --article https://...
@@ -96,7 +96,7 @@ held-out laydowns).
 > own model:
 > XXXX-ARTICLE-LINK
 >
-> Code: XXXX-GITHUB-LINK
+> Code: https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser
 >
 > Prototype on synthetic data — the point is the governance, not the number.
 >
@@ -200,7 +200,7 @@ held-out laydowns).
 
 **Comment 5 — code**
 
-> Code, governance docs and the honest limitations: XXXX-GITHUB-LINK
+> Code, governance docs and the honest limitations: https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser
 >
 > The README carries the case study, the 90-day delivery plan, the RAID register, the model
 > governance policy and the measurement plan. Every number regenerates with `make data &&

@@ -309,7 +309,7 @@ portfolio projects — and a fair number of vendor decks — produce impressive 
 
 ---
 
-**Code, governance docs and the full limitations:** XXXX-GITHUB-LINK
+**Code, governance docs and the full limitations:** https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser
 
 Everything above regenerates from the repo: `make data && make train && make eval` rebuilds
 the dataset, the model and every number in the results table. `eval/baseline.json` is the

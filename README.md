@@ -1,5 +1,7 @@
 # Cotton Blend Optimisation for Spinning Mills
 
+[![ci](https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser/actions/workflows/ci.yml/badge.svg)](https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser/actions/workflows/ci.yml)
+
 A learning / portfolio prototype at **enterprise-grade design, prototype scale**.
 
 Raw cotton is 55-65% of yarn cost. Each week a mixing master decides the **bale

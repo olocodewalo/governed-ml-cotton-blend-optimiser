@@ -18,6 +18,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 SRC = HERE / "article.md"
 DST = HERE / "article_paste.html"
+CLEAN = HERE / "article_body_clean.html"
 
 STYLE = """<style>
  body { font-family: Georgia, 'Times New Roman', serif; max-width: 760px; margin: 40px auto;
@@ -40,7 +41,9 @@ The title is the H1 below -- LinkedIn keeps it in its own field, so cut it from 
 def inline(s: str) -> str:
     s = html.escape(s)
     s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
-    s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
+    s = re.sub(r"\*\*\*(.+?)\*\*\*", r"<strong><em>\1</em></strong>", s)
+    # bold may wrap an italic span, e.g. **Micronaire *variance***
+    s = re.sub(r"\*\*((?:[^*]|\*[^*]+\*)+?)\*\*", r"<strong>\1</strong>", s)
     s = re.sub(r"(?<!\w)\*([^*]+)\*(?!\w)", r"<em>\1</em>", s)
     s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
     return s
@@ -133,13 +136,51 @@ def convert(md: str) -> str:
     return "\n".join(out)
 
 
+# Where the visuals go: (heading text to insert after, file, caption)
+IMAGES = [
+    ("The decision this system supports",
+     "docs/screenshots/01_review_screen.png",
+     "The review screen the mixing master sees: recommended blend, predicted quality with "
+     "P10-P90 intervals, the confidence level and its reasons, and the price-age check."),
+    ("Uncertainty — and why it decides everything downstream",
+     "docs/linkedin/slides/slide_5.png",
+     "Why the intervals mattered more than the predictions."),
+    ("The optimiser — why two of them",
+     "docs/linkedin/slides/slide_6.png",
+     "MILP for speed and shadow prices; the genetic algorithm for the full non-linear model."),
+    ("Results, and how they shrank",
+     "docs/linkedin/slides/slide_9.png",
+     "Every headline number, before and after the audit."),
+    ("Governance — the part that actually changed the outcome",
+     "docs/linkedin/slides/slide_10.png",
+     "The promotion gate refusing its own author."),
+]
+
+
+def add_image_markers(body: str) -> str:
+    for heading, path, caption in IMAGES:
+        pattern = re.compile(rf"(<h[23]>{re.escape(html.escape(heading))}</h[23]>)")
+        marker = (f'<p class="upload">UPLOAD IMAGE HERE: {path}<br>'
+                  f'<span style="font-weight:400">caption: {html.escape(caption)}</span></p>')
+        body, n = pattern.subn(rf"\1\n{marker}", body, count=1)
+        if not n:
+            print(f"  [warn] no heading matched for {path}")
+    return body
+
+
 def main() -> None:
-    body = convert(SRC.read_text(encoding="utf-8"))
+    body = add_image_markers(convert(SRC.read_text(encoding="utf-8")))
     DST.write_text(f"<meta charset='utf-8'><title>Paste into LinkedIn</title>{STYLE}\n{HOWTO}\n{body}\n",
                    encoding="utf-8")
-    print(f"wrote {DST}")
+    # clean variant: no instructions box, no H1 -- a select-all copy of this file is
+    # exactly what belongs in the article body
+    clean = re.sub(r"<h1>.*?</h1>", "", body, flags=re.S)
+    CLEAN.write_text(f"<meta charset='utf-8'><title>Article body</title>{STYLE}\n{clean}\n",
+                     encoding="utf-8")
     marker = 'class="upload"'
+    print(f"wrote {DST}\nwrote {CLEAN}")
     print(f"headings: {body.count('<h2>') + body.count('<h3>')}, "
+          f"lists: {body.count('<ul>')}, bold: {body.count('<strong>')}, "
           f"image markers: {body.count(marker)}")
 
 

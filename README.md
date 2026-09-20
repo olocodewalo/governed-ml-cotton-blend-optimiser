@@ -118,6 +118,7 @@ deterministic templated rationale is used -- everything still runs).
 - [Cost model](docs/cost_model.md) -- programme cost (incl. LLM/compute) vs 1-4% cotton saving
 - [Value hypothesis & measurement plan](docs/value_hypothesis_and_measurement.md) -- baseline, targets, how measured, who verifies
 - [LP vs metaheuristic](docs/lp_vs_metaheuristic.md) -- optimiser trade-offs and the training-support finding
+- [Full technical write-up](docs/linkedin/article.md) -- every design choice and why, end to end
 
 ### Where each policy control lives
 

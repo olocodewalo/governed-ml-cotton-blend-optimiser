@@ -6,7 +6,6 @@
     --line: #d7e2db;
     --paper: #f7faf8;
     --accent: #0f7a52;
-    --warn: #b4531a;
     --bad: #a3282d;
     --chip: #e7f1ec;
   }
@@ -14,48 +13,56 @@
   body { margin: 0; background: #223; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
   .slide {
     width: 1080px; height: 1350px; background: var(--paper); color: var(--ink);
-    padding: 84px 80px 70px; display: flex; flex-direction: column; position: relative;
+    padding: 80px 76px 66px; display: flex; flex-direction: column; position: relative;
   }
-  .kicker { font-size: 24px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  h1 { font-size: 74px; line-height: 1.06; margin: 26px 0 0; letter-spacing: -.02em; }
-  h2 { font-size: 56px; line-height: 1.1; margin: 22px 0 0; letter-spacing: -.015em; }
-  .sub { font-size: 30px; line-height: 1.45; color: var(--muted); margin-top: 28px; }
-  .body { font-size: 29px; line-height: 1.5; margin-top: 34px; }
-  ul { margin: 30px 0 0; padding-left: 0; list-style: none; }
-  li { font-size: 28px; line-height: 1.42; margin-bottom: 24px; padding-left: 46px; position: relative; }
+  .kicker { font-size: 23px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 72px; line-height: 1.06; margin: 24px 0 0; letter-spacing: -.02em; }
+  h2 { font-size: 54px; line-height: 1.1; margin: 20px 0 0; letter-spacing: -.015em; }
+  .sub { font-size: 29px; line-height: 1.45; color: var(--muted); margin-top: 26px; }
+  .body { font-size: 28px; line-height: 1.5; margin-top: 30px; }
+  ul { margin: 28px 0 0; padding-left: 0; list-style: none; }
+  li { font-size: 27px; line-height: 1.4; margin-bottom: 22px; padding-left: 44px; position: relative; }
   li::before { content: "→"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
-  li b { font-weight: 700; }
-  .foot { margin-top: auto; padding-top: 34px; border-top: 2px solid var(--line);
-          display: flex; justify-content: space-between; align-items: center; font-size: 22px; color: var(--muted); }
-  .chip { background: var(--chip); color: var(--accent); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 22px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 34px; font-size: 26px; }
-  th { text-align: left; font-size: 21px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
-       border-bottom: 2px solid var(--line); padding: 0 12px 14px 0; }
-  td { padding: 19px 12px 19px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .foot { margin-top: auto; padding-top: 30px; border-top: 2px solid var(--line);
+          display: flex; justify-content: space-between; align-items: center; font-size: 21px; color: var(--muted); }
+  .chip { background: var(--chip); color: var(--accent); border-radius: 999px; padding: 9px 20px; font-weight: 600; font-size: 21px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 25px; }
+  th { text-align: left; font-size: 20px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+       border-bottom: 2px solid var(--line); padding: 0 12px 13px 0; }
+  td { padding: 17px 12px 17px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .was { color: var(--bad); text-decoration: line-through; opacity: .75; }
   .now { color: var(--accent); font-weight: 700; }
-  .flow { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; }
-  .row { display: flex; align-items: stretch; gap: 16px; }
-  .box { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 22px 24px; }
-  .box .t { font-size: 25px; font-weight: 700; }
-  .box .d { font-size: 21px; color: var(--muted); margin-top: 8px; line-height: 1.35; }
+  .flow { margin-top: 34px; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; align-items: stretch; gap: 14px; }
+  .box { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 20px 22px; }
+  .box .t { font-size: 24px; font-weight: 700; }
+  .box .d { font-size: 20px; color: var(--muted); margin-top: 7px; line-height: 1.35; }
   .box.core { border-color: var(--accent); border-width: 3px; }
   .box.side { background: #f1f6f3; }
-  .arrow { text-align: center; color: var(--accent); font-size: 26px; font-weight: 700; }
-  .term { margin-top: 34px; background: #10201a; color: #d9f2e4; border-radius: 16px; padding: 30px 32px;
-          font-family: "Cascadia Mono", Consolas, monospace; font-size: 21px; line-height: 1.55; white-space: pre-wrap; }
+  .arrow { text-align: center; color: var(--accent); font-size: 24px; font-weight: 700; }
+  .term { margin-top: 30px; background: #10201a; color: #d9f2e4; border-radius: 16px; padding: 28px 30px;
+          font-family: "Cascadia Mono", Consolas, monospace; font-size: 20px; line-height: 1.55; white-space: pre-wrap; }
   .term .ok { color: #7fd6a8; }
   .term .no { color: #ff9a8a; }
   .term .dim { color: #7d968a; }
-  .big { font-size: 120px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-  .note { font-size: 22px; color: var(--muted); margin-top: 26px; line-height: 1.45; }
-  .pill-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-  .pill { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 12px 24px; font-size: 23px; }
-  .stats { display: flex; gap: 22px; margin-top: 52px; }
-  .stat { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 26px 24px; }
-  .stat .n { font-size: 54px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
-  .stat .l { font-size: 21px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
+  .note { font-size: 21px; color: var(--muted); margin-top: 24px; line-height: 1.45; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .pill { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 11px 22px; font-size: 22px; }
+  .stats { display: flex; gap: 20px; margin-top: 46px; }
+  .stat { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 24px 22px; }
+  .stat .n { font-size: 52px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+  .stat .l { font-size: 20px; color: var(--muted); margin-top: 9px; line-height: 1.35; }
+  .why { margin-top: 30px; display: flex; flex-direction: column; gap: 18px; }
+  .why .item { border-left: 5px solid var(--accent); padding: 4px 0 4px 26px; }
+  .why .h { font-size: 27px; font-weight: 700; }
+  .why .p { font-size: 22px; color: var(--muted); line-height: 1.42; margin-top: 7px; }
+  .cols { display: flex; gap: 22px; margin-top: 32px; }
+  .col { flex: 1; border: 2px solid var(--line); border-radius: 18px; background: #fff; padding: 26px 26px 22px; }
+  .col h3 { margin: 0; font-size: 30px; }
+  .col .tag { font-size: 19px; color: var(--accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .col p { font-size: 21px; line-height: 1.42; color: var(--muted); margin: 14px 0 0; }
+  .col p b { color: var(--ink); }
 </style>
 
 <!-- 1 -->
@@ -65,94 +72,214 @@
   <div class="sub">A decision-support system for the weekly cotton bale laydown in a spinning mill:
     ML quality model → cost optimiser → explanation → human sign-off → audit trail.</div>
   <div class="body"><b>The first write-up claimed ~6% cost saving.</b> It came from a 15-scenario
-    sample. Measured properly on all 50 held-out laydowns, with a contamination cap the
-    mill would actually impose, it is <b>3.0% (95% CI 0.8–5.5%)</b>.<br><br>
-    Here is what the audit found, and what I changed.</div>
+    sample. Measured on all 50 held-out laydowns, with a contamination cap the mill would
+    actually impose, it is <b>3.0% (95% CI 0.8–5.5%)</b>.</div>
   <div class="stats">
     <div class="stat"><div class="n">50</div><div class="l">held-out laydowns<br>in the golden set</div></div>
     <div class="stat"><div class="n">5</div><div class="l">controls the docs claimed<br>that the code lacked</div></div>
     <div class="stat"><div class="n">0/50</div><div class="l">optimiser blends inside<br>the training support</div></div>
   </div>
-  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">1 / 6</span></div>
+  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">1 / 10</span></div>
 </div>
 
 <!-- 2 -->
 <div class="slide">
   <div class="kicker">The decision</div>
-  <h2>Raw cotton is 55–65% of yarn cost.<br>One person decides it weekly.</h2>
+  <h2>Raw cotton is 55–65%<br>of yarn cost. One person<br>decides it every week.</h2>
   <div class="body">A mixing master picks which bales go into the laydown and in what
-    proportions, trading ₹/kg against spun-yarn quality. Today that lives in one expert's
-    head and a spreadsheet, is not re-optimised when prices move, and leaves no record of
-    why a blend was chosen.</div>
+    proportions. Ring-spun cotton, 20s–60s Ne — the workhorse range of Indian spinning.
+    He is balancing four things at once:</div>
   <ul>
-    <li><b>Quality is non-linear in the blend.</b> Short-fibre content penalises strength with a
-      power &gt; 1. Micronaire <i>variance</i> hurts evenness independently of the mean. A linear
-      cost rule cannot see either.</li>
-    <li><b>So the ML earns its place</b> — it predicts CSP, U%, imperfections and ends-down from
-      the blend's aggregate fibre profile.</li>
-    <li><b>The optimiser treats quality as a constraint</b>, not an objective: cheapest blend that
-      still meets the count's spec band and stays near the rolling 30-laydown average.</li>
+    <li><b>Cost</b> — bales differ in ₹/kg by origin, grade and lot.</li>
+    <li><b>Quality</b> — CSP, U%, imperfections and ends-down must land inside the count's spec band.</li>
+    <li><b>Consistency</b> — the fibre profile must stay near the rolling average, or count and dye
+      affinity wander between lots.</li>
+    <li><b>Contamination risk</b> — polypropylene and hair travel with certain origins and cannot be
+      cleaned out. They surface after dyeing, in the customer's fabric.</li>
   </ul>
-  <div class="foot"><span>Cotton blend optimisation</span><span class="chip">2 / 6</span></div>
+  <div class="note">Today this lives in one expert's head and a spreadsheet. It is not re-optimised
+    when cotton prices move mid-week, and it leaves no record of why a blend was chosen — so when a
+    lot goes bad nobody can reconstruct the reasoning, and when he retires it leaves with him.</div>
+  <div class="foot"><span>The most expensive recurring decision in the plant</span><span class="chip">2 / 10</span></div>
 </div>
 
 <!-- 3 -->
+<div class="slide">
+  <div class="kicker">Why ML, not a rule</div>
+  <h2>Three non-linearities<br>a cost rule cannot see.</h2>
+  <div class="why">
+    <div class="item">
+      <div class="h">Short-fibre content penalises with an exponent &gt; 1</div>
+      <div class="p">A blend at 13% SFC is far worse than twice as bad as one at 9%. Strength and
+        evenness both fall away faster than linearly.</div>
+    </div>
+    <div class="item">
+      <div class="h">Micronaire <i>variance</i> matters on its own</div>
+      <div class="p">Mixing coarse and fine fibre hurts evenness and neps super-linearly,
+        <b>independently of the mean</b>. Two blends with identical average micronaire spin
+        differently — which is why the model gets weighted variances as explicit features.</div>
+    </div>
+    <div class="item">
+      <div class="h">Neps come from two causes that interact</div>
+      <div class="p">Immature fibre and short fibre multiply each other's effect rather than adding.</div>
+    </div>
+  </div>
+  <div class="note">So the model predicts CSP, U%, imperfections and ends-down from the blend's
+    aggregate fibre profile — weighted means, weighted variances, origin fractions, and an
+    effective bale count (inverse Herfindahl) that separates "45 bales evenly spread" from
+    "45 bales, four of which are most of the mixing".</div>
+  <div class="foot"><span>The response surface is continuous and interacting</span><span class="chip">3 / 10</span></div>
+</div>
+
+<!-- 4 -->
 <div class="slide">
   <div class="kicker">Architecture</div>
   <h2>The LLM is nowhere near<br>the decision.</h2>
   <div class="flow">
     <div class="row">
-      <div class="box"><div class="t">Data layer</div><div class="d">2,000 synthetic bale tests + 500 historical laydowns with actual yarn QC. One feature function shared by training and serving.</div></div>
-      <div class="box core"><div class="t">ML quality model</div><div class="d">LightGBM multi-output + P10/P90 heads, calibrated with 5-fold conformalized quantile regression.</div></div>
+      <div class="box"><div class="t">Data layer</div><div class="d">2,000 synthetic bale tests + 500 historical laydowns with actual yarn QC. One feature function shared by training, both optimisers and the app — train/serve skew made structurally impossible.</div></div>
+      <div class="box core"><div class="t">ML quality model</div><div class="d">LightGBM mean + P10/P90 heads, calibrated with 5-fold conformalized quantile regression.</div></div>
     </div>
     <div class="arrow">▼</div>
     <div class="row">
-      <div class="box core"><div class="t">Cost optimiser</div><div class="d">MILP (PuLP/CBC) on a linear surrogate + GA (DEAP) on the full model. Guards run first: stale prices refused, contamination-prone origins hard-capped.</div></div>
+      <div class="box core"><div class="t">Guards, then optimiser</div><div class="d">Stale prices refused, contamination-prone origins hard-capped. Then MILP (PuLP/CBC) and/or a GA (DEAP).</div></div>
       <div class="box core"><div class="t">Confidence policy</div><div class="d">HIGH / MEDIUM / LOW. Out-of-support blends are never HIGH, so a human must review them.</div></div>
     </div>
     <div class="arrow">▼</div>
     <div class="row">
-      <div class="box side"><div class="t">RAG + LLM explainer</div><div class="d">18 fibre-science notes retrieved, Claude writes a 4–6 sentence rationale. Advisory only, never touches a number, falls back to a template with no API key.</div></div>
-      <div class="box"><div class="t">Human + audit</div><div class="d">Approve / Adjust / Reject. Every decision, confidence and reason written to SQLite.</div></div>
+      <div class="box side"><div class="t">RAG + LLM explainer</div><div class="d">18 fibre-science notes retrieved; Claude writes a 4–6 sentence rationale. Advisory only, never touches a number.</div></div>
+      <div class="box"><div class="t">Human + audit</div><div class="d">Approve / Adjust / Reject, then SQLite: recommendation, confidence, reasons, decision.</div></div>
     </div>
   </div>
-  <div class="note">No agents in the decision path. The weekly blend has to be deterministic,
-    reproducible and auditable — the whole governance layer depends on that.</div>
-  <div class="foot"><span>ML + operations research + a thin LLM layer</span><span class="chip">3 / 6</span></div>
+  <div class="note">Closing the loop: golden-set eval, a regression gate, PSI drift monitoring, and
+    master corrections folded back into training.</div>
+  <div class="foot"><span>ML + operations research + a thin LLM layer</span><span class="chip">4 / 10</span></div>
 </div>
 
-<!-- 4 -->
+<!-- 5 -->
+<div class="slide">
+  <div class="kicker">The model</div>
+  <h2>Why LightGBM — and why<br>the intervals mattered more<br>than the predictions.</h2>
+  <div class="why">
+    <div class="item">
+      <div class="h">LightGBM, not a neural net</div>
+      <div class="p">400 training laydowns, 15 tabular features, strong interactions. That is exactly
+        where gradient-boosted trees beat both linear models and deep nets — a net would memorise.
+        It also gives a native quantile objective and SHAP, both of which I needed.</div>
+    </div>
+    <div class="item">
+      <div class="h">The P10 is what gates auto-suggest</div>
+      <div class="p">A blend whose <i>mean</i> CSP clears the floor but whose P10 does not is roughly a
+        one-in-ten chance of shipping out-of-spec yarn. So a too-narrow band doesn't just look
+        wrong — it manufactures false confidence in the exact gate meant to catch risk.</div>
+    </div>
+    <div class="item">
+      <div class="h">Conformalized quantile regression fixed it</div>
+      <div class="p">Raw quantile heads on 400 rows overfit and came out too narrow: coverage 0.67 and
+        0.68 against a policy demanding 0.70–0.90. 5-fold CQR — out-of-fold conformity scores
+        max(lo − y, y − hi), finite-sample corrected, widened additively — restored it to
+        <b>0.76 and 0.80</b>, with <b>no change to point accuracy</b>.</div>
+    </div>
+  </div>
+  <div class="note">Chronological train/test split, because a random one would leak time structure
+    and flatter the model.</div>
+  <div class="foot"><span>Distribution-free coverage under exchangeability</span><span class="chip">5 / 10</span></div>
+</div>
+
+<!-- 6 -->
+<div class="slide">
+  <div class="kicker">The optimiser</div>
+  <h2>Two optimisers, because<br>neither one is enough.</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="tag">MILP · PuLP + CBC</div>
+      <h3>Fast and explainable</h3>
+      <p><b>Why it can't use the real model:</b> quality depends on weighted <i>variances</i>, which
+        are quadratic in the blend weights — not expressible in a linear program. So it optimises an
+        OLS surrogate fitted on the linear-in-w features only.</p>
+      <p><b>Why that's acceptable:</b> the full model re-scores the LP's answer, and if it fell out
+        of band the safety margins inflate and it re-solves. The surrogate gap is exposed, not hidden.</p>
+      <p><b>What it buys:</b> 1–3 seconds, global optimum against the surrogate, deterministic (so the
+        regression harness is reproducible), and shadow prices — "which constraint costs me most".</p>
+    </div>
+    <div class="col">
+      <div class="tag">Genetic algorithm · DEAP</div>
+      <h3>Exact, slower</h3>
+      <p><b>Why:</b> it scores candidates with the same non-linear model the mixing master will see.
+        No surrogate gap, and it can express constraints an LP cannot — P10 floors, variance penalties.</p>
+      <p><b>How it stays tractable:</b> the whole population is scored in one batched predict call per
+        generation. Tournament selection, uniform crossover, sparsify/jitter mutation, elitist merge.</p>
+      <p><b>The cost:</b> stochastic (seeded), only near-optimal, no shadow prices.</p>
+    </div>
+  </div>
+  <div class="note">Both run the guards first. An optimiser is a machine for finding the cheapest
+    corner of whatever space you hand it — so prices older than 7 days are refused outright, and
+    contamination-prone origins are hard-capped regardless of price.</div>
+  <div class="foot"><span>LP first for speed, GA to polish against the full model</span><span class="chip">6 / 10</span></div>
+</div>
+
+<!-- 7 -->
+<div class="slide">
+  <div class="kicker">Where the LLM sits</div>
+  <h2>This is not a<br>generative-AI use case.<br>Pretending otherwise<br>would be the tell.</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="tag">What it does</div>
+      <p><b>RAG</b> over 18 hand-written fibre-science notes. The query is built from the run itself:
+        yarn count, binding constraints, micronaire spread, SFC.</p>
+      <p><b>Claude</b> writes a 4–6 sentence rationale grounded in those notes and the run's numbers,
+        naming which constraints bind and why the fibre science makes them bind.</p>
+      <p>Retrieval falls back from sentence-transformers to TF-IDF, so it runs on a mill VM with no
+        GPU and no model download.</p>
+    </div>
+    <div class="col">
+      <div class="tag">What it never does</div>
+      <p><b>It never computes or changes a number.</b> Every figure in the rationale comes from the
+        optimiser and the model.</p>
+      <p>With no API key it degrades to a deterministic template and the UI says so — the pipeline
+        never blocks on a third-party service.</p>
+      <p><b>No agents in the decision path.</b> A weekly blend has to be deterministic and
+        reproducible; every governance control here depends on that. An agentic what-if layer belongs
+        <i>above</i> these tools, not inside them.</p>
+    </div>
+  </div>
+  <div class="note">The rationale exists for trust and knowledge capture: the reasoning that used to
+    live in one person's head now gets written down, next to the decision, every week.</div>
+  <div class="foot"><span>Advisory, off the decision path, degrades safely</span><span class="chip">7 / 10</span></div>
+</div>
+
+<!-- 8 -->
 <div class="slide">
   <div class="kicker">The audit</div>
   <h2>My docs described controls<br>my code did not have.</h2>
   <ul>
-    <li><b>The model failed its own policy.</b> The policy required 70–90% interval coverage.
-      Imperfections and ends-down were at 67% and 68%.</li>
-    <li><b>An unapproved model was serving.</b> Training overwrote the "current" pointer, so a
+    <li><b>The model failed its own policy.</b> I required 70–90% interval coverage; imperfections and
+      ends-down sat at 67% and 68%.</li>
+    <li><b>An unapproved model was serving.</b> Training quietly overwrote the "current" pointer, so a
       candidate went live without sign-off.</li>
     <li><b>Written but never built:</b> drift detection, an out-of-support check, a price-freshness
       guard, a contamination cap. All four were in the governance doc. None were in the code.</li>
-    <li><b>The optimiser exploited that.</b> On a 20s scenario it put <b>54.6%</b> of the blend into
-      the one origin a mixing master caps for contamination risk.</li>
+    <li><b>The optimiser exploited that.</b> On a 20s Ne scenario it put <b>54.6%</b> of the blend into
+      the one origin a mixing master caps for contamination risk, because it was cheap.</li>
     <li><b>CI did not exist</b> — while the policy said the regression suite "fails CI".</li>
   </ul>
-  <div class="note">This is the ordinary failure mode of ML governance: the document is the
-    control, and nothing enforces it.</div>
-  <div class="foot"><span>Five gaps, all in the docs already</span><span class="chip">4 / 6</span></div>
+  <div class="note">This is the ordinary failure mode of ML governance: the document is the control,
+    and nothing enforces it. Tests went from 9 to 40, and now run on every push.</div>
+  <div class="foot"><span>Five gaps, all of them already in the docs</span><span class="chip">8 / 10</span></div>
 </div>
 
-<!-- 5 -->
+<!-- 9 -->
 <div class="slide">
   <div class="kicker">After</div>
   <h2>Smaller numbers.<br>Numbers I can defend.</h2>
   <table>
     <tr><th>Measure</th><th>Before</th><th>After</th></tr>
     <tr><td>Saving at matched quality</td>
-        <td class="num was">6.4%<br><span style="font-size:20px">n=11</span></td>
-        <td class="num now">3.0%<br><span style="font-size:20px;font-weight:400">CI 0.8–5.5%, n=35</span></td></tr>
+        <td class="num was">6.4%<br><span style="font-size:19px">n=11</span></td>
+        <td class="num now">3.0%<br><span style="font-size:19px;font-weight:400">CI 0.8–5.5%, n=35</span></td></tr>
     <tr><td>Optimiser lands in spec band</td>
-        <td class="num was">0.93<br><span style="font-size:20px">15 scenarios</span></td>
-        <td class="num now">0.90<br><span style="font-size:20px;font-weight:400">CI 0.79–0.96, all 50</span></td></tr>
+        <td class="num was">0.93<br><span style="font-size:19px">15 scenarios</span></td>
+        <td class="num now">0.90<br><span style="font-size:19px;font-weight:400">CI 0.79–0.96, all 50</span></td></tr>
     <tr><td>Interval coverage<br>(imperfections / ends-down)</td>
         <td class="num was">0.72 / 0.68</td>
         <td class="num now">0.76 / 0.80</td></tr>
@@ -162,16 +289,17 @@
     <tr><td>Blends inside training support</td>
         <td class="num">not measured</td>
         <td class="num now">0 of 50</td></tr>
-    <tr><td>Tests</td><td class="num">9</td><td class="num now">40 + CI</td></tr>
   </table>
-  <div class="note"><b>That last row is the uncomfortable one.</b> The cheapest in-band blend is,
-    by construction, unlike anything in the training data. I tried forcing blends to look
-    historical; it cost the saving and the in-band rate and fixed nothing. So the system now
-    says so out loud: every recommendation is capped at MEDIUM confidence and goes to a human.</div>
-  <div class="foot"><span>Golden set: 50 held-out laydowns</span><span class="chip">5 / 6</span></div>
+  <div class="note"><b>That last row is the uncomfortable one.</b> The cheapest in-band blend is, by
+    construction, unlike anything in the training data — measured as kNN distance to the nearest
+    training laydowns, over the training set's own 99th percentile. I tried forcing blends to look
+    historical; it cut in-band from 0.90 to 0.82 and the saving to ~0, and lifted in-support blends
+    only to 8%. Bad trade, reverted. So the system says it out loud instead: capped at MEDIUM
+    confidence, human review mandatory.</div>
+  <div class="foot"><span>Golden set: 50 held-out laydowns</span><span class="chip">9 / 10</span></div>
 </div>
 
-<!-- 6 -->
+<!-- 10 -->
 <div class="slide">
   <div class="kicker">What it takes to ship</div>
   <h2>The gate that refused me.</h2>
@@ -185,16 +313,18 @@
 
 <span class="no">REFUSED</span><span class="dim">: fix them or record a CAB decision
 with --accept-regression "&lt;reason&gt;"</span></div>
-  <div class="body" style="margin-top:32px">It took a recorded reason, signed by a named human,
-    before the model was allowed to serve. That record now sits in the registry next to the
-    model version — which is the point.</div>
+  <div class="body" style="margin-top:28px">Thresholds are not overridable — false-accept rate is the
+    hard gate, because shipping out-of-spec yarn costs more than any cotton saving. A regression can
+    be accepted only with a written reason from a named human, which now sits in the model registry
+    next to the version.</div>
   <div class="pill-row">
     <span class="pill">Python</span><span class="pill">LightGBM</span><span class="pill">Conformal prediction</span>
-    <span class="pill">PuLP / CBC</span><span class="pill">DEAP</span><span class="pill">RAG + Claude</span>
-    <span class="pill">Streamlit</span><span class="pill">GitHub Actions</span>
+    <span class="pill">PuLP / CBC</span><span class="pill">DEAP</span><span class="pill">scikit-learn</span>
+    <span class="pill">RAG + Claude</span><span class="pill">Streamlit</span><span class="pill">SQLite</span>
+    <span class="pill">GitHub Actions</span>
   </div>
-  <div class="note">Prototype on synthetic data, built to show the shape of a governed ML
-    decision system — not a validated mill result. Code and the full write-up are in the
-    repo; the honest limitations are in the README.</div>
-  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">6 / 6</span></div>
+  <div class="note">Prototype on synthetic data, built to show the shape of a governed ML decision
+    system — not a validated mill result. Code, governance docs and the honest limitations are in
+    the repo.</div>
+  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">10 / 10</span></div>
 </div>

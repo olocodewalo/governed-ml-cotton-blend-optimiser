@@ -62,8 +62,10 @@ def _facts_block(scenario, result, baseline) -> str:
                  f"(drift limits +/-{scenario.mic_tol} and +/-{scenario.strength_tol})")
     if baseline is not None:
         saving = baseline.price_inr_per_kg - result.price_inr_per_kg
-        lines.append(f"Naive baseline blend: {baseline.price_inr_per_kg} INR/kg "
-                     f"-> saving {saving:.1f} INR/kg ({100*saving/baseline.price_inr_per_kg:.1f}%)")
+        band = "in band" if baseline.in_band else ("OUT OF BAND -- not a like-for-like comparison, "
+                                                   "do not call the difference a saving")
+        lines.append(f"Naive baseline blend: {baseline.price_inr_per_kg} INR/kg ({band}) "
+                     f"-> difference {saving:.1f} INR/kg ({100*saving/baseline.price_inr_per_kg:.1f}%)")
     lines.append("Binding / violated constraints: " +
                  (", ".join(result.binding_constraints) or "none (comfortably in band)"))
     return "\n".join(lines)
@@ -75,9 +77,14 @@ def _templated(scenario, result, baseline, sources, backend) -> Explanation:
     save_txt = ""
     if baseline is not None:
         s = baseline.price_inr_per_kg - result.price_inr_per_kg
-        save_txt = (f" It costs {result.price_inr_per_kg:.1f} INR/kg, about "
-                    f"{100*s/baseline.price_inr_per_kg:.1f}% below the naive baseline "
-                    f"at comparable predicted quality.")
+        pct = 100 * s / baseline.price_inr_per_kg
+        if baseline.in_band:
+            save_txt = (f" It costs {result.price_inr_per_kg:.1f} INR/kg, about "
+                        f"{pct:.1f}% below the naive baseline at comparable predicted quality.")
+        else:
+            save_txt = (f" It costs {result.price_inr_per_kg:.1f} INR/kg against the naive baseline's "
+                        f"{baseline.price_inr_per_kg:.1f}, but that baseline is outside the spec band, "
+                        f"so the difference is the price of meeting quality, not a saving.")
     csp = result.predicted["csp"]
     txt = (
         f"For {scenario.target_count} the optimiser recommends a {sum(1 for w in result.weights if w>1e-4)}-bale "

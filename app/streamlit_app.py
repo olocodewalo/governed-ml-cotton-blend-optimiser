@@ -120,10 +120,16 @@ if "result" in st.session_state:
     c1.metric("Blend cost", f"₹{result.price_inr_per_kg:.1f}/kg",
               f"{result.price_inr_per_kg - baseline.price_inr_per_kg:+.1f} vs naive")
     saving = 100 * (baseline.price_inr_per_kg - result.price_inr_per_kg) / baseline.price_inr_per_kg
-    c2.metric("Saving vs naive baseline", f"{saving:.1f}%")
+    c2.metric("vs naive baseline", f"{saving:+.1f}%",
+              help="The naive rule-of-thumb blend. Comparable only when it is itself in band.")
     c3.metric("In spec band?", "YES" if result.in_band else "NO")
     c4.metric("Confidence", conf.level)
     (st.success if conf.level == "HIGH" else st.warning if conf.level == "MEDIUM" else st.error)(conf.summary)
+    if not baseline.in_band:
+        st.info(f"The naive baseline blend (₹{baseline.price_inr_per_kg:.1f}/kg) is **out of the spec "
+                f"band**, so it is cheaper only because it misses quality — the percentage above is not "
+                f"a like-for-like saving. The defensible number is the golden-set saving at matched "
+                f"quality (eval/baseline.json), not this one.")
     ages = price_age_days(scenario.inventory, scenario.planning_date)
     st.caption(f"planning date {scenario.planning_date.date()} · bale prices {int(ages.min())}-"
                f"{int(ages.max())} days old (limit {PRICE_MAX_AGE_DAYS})")

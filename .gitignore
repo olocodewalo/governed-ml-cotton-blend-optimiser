@@ -14,3 +14,4 @@ docs/shap_summary.png
 .pytest_cache/
 eval/latest_metrics.json
 data/manifest.json
+.claude/

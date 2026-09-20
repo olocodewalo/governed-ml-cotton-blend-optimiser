@@ -1,0 +1,200 @@
+<title>Cotton Blend Optimisation — carousel</title>
+<style>
+  :root {
+    --ink: #10201a;
+    --muted: #556b62;
+    --line: #d7e2db;
+    --paper: #f7faf8;
+    --accent: #0f7a52;
+    --warn: #b4531a;
+    --bad: #a3282d;
+    --chip: #e7f1ec;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #223; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .slide {
+    width: 1080px; height: 1350px; background: var(--paper); color: var(--ink);
+    padding: 84px 80px 70px; display: flex; flex-direction: column; position: relative;
+  }
+  .kicker { font-size: 24px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 74px; line-height: 1.06; margin: 26px 0 0; letter-spacing: -.02em; }
+  h2 { font-size: 56px; line-height: 1.1; margin: 22px 0 0; letter-spacing: -.015em; }
+  .sub { font-size: 30px; line-height: 1.45; color: var(--muted); margin-top: 28px; }
+  .body { font-size: 29px; line-height: 1.5; margin-top: 34px; }
+  ul { margin: 30px 0 0; padding-left: 0; list-style: none; }
+  li { font-size: 28px; line-height: 1.42; margin-bottom: 24px; padding-left: 46px; position: relative; }
+  li::before { content: "→"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  li b { font-weight: 700; }
+  .foot { margin-top: auto; padding-top: 34px; border-top: 2px solid var(--line);
+          display: flex; justify-content: space-between; align-items: center; font-size: 22px; color: var(--muted); }
+  .chip { background: var(--chip); color: var(--accent); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 22px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 34px; font-size: 26px; }
+  th { text-align: left; font-size: 21px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+       border-bottom: 2px solid var(--line); padding: 0 12px 14px 0; }
+  td { padding: 19px 12px 19px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .was { color: var(--bad); text-decoration: line-through; opacity: .75; }
+  .now { color: var(--accent); font-weight: 700; }
+  .flow { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; align-items: stretch; gap: 16px; }
+  .box { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 22px 24px; }
+  .box .t { font-size: 25px; font-weight: 700; }
+  .box .d { font-size: 21px; color: var(--muted); margin-top: 8px; line-height: 1.35; }
+  .box.core { border-color: var(--accent); border-width: 3px; }
+  .box.side { background: #f1f6f3; }
+  .arrow { text-align: center; color: var(--accent); font-size: 26px; font-weight: 700; }
+  .term { margin-top: 34px; background: #10201a; color: #d9f2e4; border-radius: 16px; padding: 30px 32px;
+          font-family: "Cascadia Mono", Consolas, monospace; font-size: 21px; line-height: 1.55; white-space: pre-wrap; }
+  .term .ok { color: #7fd6a8; }
+  .term .no { color: #ff9a8a; }
+  .term .dim { color: #7d968a; }
+  .big { font-size: 120px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+  .note { font-size: 22px; color: var(--muted); margin-top: 26px; line-height: 1.45; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+  .pill { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 12px 24px; font-size: 23px; }
+  .stats { display: flex; gap: 22px; margin-top: 52px; }
+  .stat { flex: 1; border: 2px solid var(--line); border-radius: 16px; background: #fff; padding: 26px 24px; }
+  .stat .n { font-size: 54px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+  .stat .l { font-size: 21px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
+</style>
+
+<!-- 1 -->
+<div class="slide">
+  <div class="kicker">Case study · prototype on synthetic data</div>
+  <h1>I audited my own ML project.<br>The headline number<br>fell by half.</h1>
+  <div class="sub">A decision-support system for the weekly cotton bale laydown in a spinning mill:
+    ML quality model → cost optimiser → explanation → human sign-off → audit trail.</div>
+  <div class="body"><b>The first write-up claimed ~6% cost saving.</b> It came from a 15-scenario
+    sample. Measured properly on all 50 held-out laydowns, with a contamination cap the
+    mill would actually impose, it is <b>3.0% (95% CI 0.8–5.5%)</b>.<br><br>
+    Here is what the audit found, and what I changed.</div>
+  <div class="stats">
+    <div class="stat"><div class="n">50</div><div class="l">held-out laydowns<br>in the golden set</div></div>
+    <div class="stat"><div class="n">5</div><div class="l">controls the docs claimed<br>that the code lacked</div></div>
+    <div class="stat"><div class="n">0/50</div><div class="l">optimiser blends inside<br>the training support</div></div>
+  </div>
+  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">1 / 6</span></div>
+</div>
+
+<!-- 2 -->
+<div class="slide">
+  <div class="kicker">The decision</div>
+  <h2>Raw cotton is 55–65% of yarn cost.<br>One person decides it weekly.</h2>
+  <div class="body">A mixing master picks which bales go into the laydown and in what
+    proportions, trading ₹/kg against spun-yarn quality. Today that lives in one expert's
+    head and a spreadsheet, is not re-optimised when prices move, and leaves no record of
+    why a blend was chosen.</div>
+  <ul>
+    <li><b>Quality is non-linear in the blend.</b> Short-fibre content penalises strength with a
+      power &gt; 1. Micronaire <i>variance</i> hurts evenness independently of the mean. A linear
+      cost rule cannot see either.</li>
+    <li><b>So the ML earns its place</b> — it predicts CSP, U%, imperfections and ends-down from
+      the blend's aggregate fibre profile.</li>
+    <li><b>The optimiser treats quality as a constraint</b>, not an objective: cheapest blend that
+      still meets the count's spec band and stays near the rolling 30-laydown average.</li>
+  </ul>
+  <div class="foot"><span>Cotton blend optimisation</span><span class="chip">2 / 6</span></div>
+</div>
+
+<!-- 3 -->
+<div class="slide">
+  <div class="kicker">Architecture</div>
+  <h2>The LLM is nowhere near<br>the decision.</h2>
+  <div class="flow">
+    <div class="row">
+      <div class="box"><div class="t">Data layer</div><div class="d">2,000 synthetic bale tests + 500 historical laydowns with actual yarn QC. One feature function shared by training and serving.</div></div>
+      <div class="box core"><div class="t">ML quality model</div><div class="d">LightGBM multi-output + P10/P90 heads, calibrated with 5-fold conformalized quantile regression.</div></div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="row">
+      <div class="box core"><div class="t">Cost optimiser</div><div class="d">MILP (PuLP/CBC) on a linear surrogate + GA (DEAP) on the full model. Guards run first: stale prices refused, contamination-prone origins hard-capped.</div></div>
+      <div class="box core"><div class="t">Confidence policy</div><div class="d">HIGH / MEDIUM / LOW. Out-of-support blends are never HIGH, so a human must review them.</div></div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="row">
+      <div class="box side"><div class="t">RAG + LLM explainer</div><div class="d">18 fibre-science notes retrieved, Claude writes a 4–6 sentence rationale. Advisory only, never touches a number, falls back to a template with no API key.</div></div>
+      <div class="box"><div class="t">Human + audit</div><div class="d">Approve / Adjust / Reject. Every decision, confidence and reason written to SQLite.</div></div>
+    </div>
+  </div>
+  <div class="note">No agents in the decision path. The weekly blend has to be deterministic,
+    reproducible and auditable — the whole governance layer depends on that.</div>
+  <div class="foot"><span>ML + operations research + a thin LLM layer</span><span class="chip">3 / 6</span></div>
+</div>
+
+<!-- 4 -->
+<div class="slide">
+  <div class="kicker">The audit</div>
+  <h2>My docs described controls<br>my code did not have.</h2>
+  <ul>
+    <li><b>The model failed its own policy.</b> The policy required 70–90% interval coverage.
+      Imperfections and ends-down were at 67% and 68%.</li>
+    <li><b>An unapproved model was serving.</b> Training overwrote the "current" pointer, so a
+      candidate went live without sign-off.</li>
+    <li><b>Written but never built:</b> drift detection, an out-of-support check, a price-freshness
+      guard, a contamination cap. All four were in the governance doc. None were in the code.</li>
+    <li><b>The optimiser exploited that.</b> On a 20s scenario it put <b>54.6%</b> of the blend into
+      the one origin a mixing master caps for contamination risk.</li>
+    <li><b>CI did not exist</b> — while the policy said the regression suite "fails CI".</li>
+  </ul>
+  <div class="note">This is the ordinary failure mode of ML governance: the document is the
+    control, and nothing enforces it.</div>
+  <div class="foot"><span>Five gaps, all in the docs already</span><span class="chip">4 / 6</span></div>
+</div>
+
+<!-- 5 -->
+<div class="slide">
+  <div class="kicker">After</div>
+  <h2>Smaller numbers.<br>Numbers I can defend.</h2>
+  <table>
+    <tr><th>Measure</th><th>Before</th><th>After</th></tr>
+    <tr><td>Saving at matched quality</td>
+        <td class="num was">6.4%<br><span style="font-size:20px">n=11</span></td>
+        <td class="num now">3.0%<br><span style="font-size:20px;font-weight:400">CI 0.8–5.5%, n=35</span></td></tr>
+    <tr><td>Optimiser lands in spec band</td>
+        <td class="num was">0.93<br><span style="font-size:20px">15 scenarios</span></td>
+        <td class="num now">0.90<br><span style="font-size:20px;font-weight:400">CI 0.79–0.96, all 50</span></td></tr>
+    <tr><td>Interval coverage<br>(imperfections / ends-down)</td>
+        <td class="num was">0.72 / 0.68</td>
+        <td class="num now">0.76 / 0.80</td></tr>
+    <tr><td>False-accept rate<br>(says in-band, truth out)</td>
+        <td class="num">0.02</td>
+        <td class="num now">0.02</td></tr>
+    <tr><td>Blends inside training support</td>
+        <td class="num">not measured</td>
+        <td class="num now">0 of 50</td></tr>
+    <tr><td>Tests</td><td class="num">9</td><td class="num now">40 + CI</td></tr>
+  </table>
+  <div class="note"><b>That last row is the uncomfortable one.</b> The cheapest in-band blend is,
+    by construction, unlike anything in the training data. I tried forcing blends to look
+    historical; it cost the saving and the in-band rate and fixed nothing. So the system now
+    says so out loud: every recommendation is capped at MEDIUM confidence and goes to a human.</div>
+  <div class="foot"><span>Golden set: 50 held-out laydowns</span><span class="chip">5 / 6</span></div>
+</div>
+
+<!-- 6 -->
+<div class="slide">
+  <div class="kicker">What it takes to ship</div>
+  <h2>The gate that refused me.</h2>
+  <div class="term">$ make promote APPROVER="Ankit Nandkishor Agrawal"
+<span class="dim">decision.false_accept_rate            0.020   &lt;= 0.05      </span><span class="ok">ok</span>
+<span class="dim">quality.ends_down.pi_coverage         0.800   in [0.7,0.9] </span><span class="ok">ok</span>
+<span class="dim">optimiser.in_band_rate                0.900   &gt;= 0.9       </span><span class="ok">ok</span>
+
+<span class="dim">regression vs baseline v1:</span>
+<span class="dim">saving_at_matched_quality      6.420 -&gt; 3.020   </span><span class="no">REGRESSED</span>
+
+<span class="no">REFUSED</span><span class="dim">: fix them or record a CAB decision
+with --accept-regression "&lt;reason&gt;"</span></div>
+  <div class="body" style="margin-top:32px">It took a recorded reason, signed by a named human,
+    before the model was allowed to serve. That record now sits in the registry next to the
+    model version — which is the point.</div>
+  <div class="pill-row">
+    <span class="pill">Python</span><span class="pill">LightGBM</span><span class="pill">Conformal prediction</span>
+    <span class="pill">PuLP / CBC</span><span class="pill">DEAP</span><span class="pill">RAG + Claude</span>
+    <span class="pill">Streamlit</span><span class="pill">GitHub Actions</span>
+  </div>
+  <div class="note">Prototype on synthetic data, built to show the shape of a governed ML
+    decision system — not a validated mill result. Code and the full write-up are in the
+    repo; the honest limitations are in the README.</div>
+  <div class="foot"><span>Ankit Nandkishor Agrawal</span><span class="chip">6 / 6</span></div>
+</div>

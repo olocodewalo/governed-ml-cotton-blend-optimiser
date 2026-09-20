@@ -6,7 +6,10 @@
    `slides/article_cover.png`. Copy its URL once published.
 2. **Then the post** (Post A below), which carries the story and sends readers to the
    article.
-3. **Then the comment thread**, posted by you, immediately.
+3. **Keep the reply bank below ready.** Do not post it as a comment thread: five
+   self-comments before anyone else has spoken makes the post look like a monologue and
+   pushes the first real commenter down to position six. Each block is an answer waiting
+   for the question that earns it.
 
 Any URL not yet known appears as an `XXXX-...-LINK` token (article, repo). Fill them in
 one command once you have them — the tokens themselves live in `set_links.py`:
@@ -129,9 +132,23 @@ held-out laydowns).
 
 ---
 
-## Comment thread — post these yourself, in order, right after publishing
+## Reply bank — answers waiting for the question that earns them
 
-**Comment 1 — the uncertainty fix, in detail**
+Both links are already in the post body, so nothing here needs to be posted just to carry
+a URL. Match the question to the block:
+
+| When someone asks | Reply with |
+|---|---|
+| How did you calibrate the intervals? Why conformal? | Reply 1 |
+| Why two optimisers? Isn't the LP enough? | Reply 2 |
+| What does "0 of 50 in training support" actually mean? | Reply 3 |
+| How is the governance enforced, not just documented? | Reply 4 |
+| Where's the code? | Reply 5 |
+
+If you want one comment of your own under the post, make it **Reply 3** — admitting the
+system's weakness starts more conversation than any of the others.
+
+**Reply 1 — the uncertainty fix, in detail**
 
 > On the intervals, since that's the part with real teeth:
 >
@@ -147,7 +164,7 @@ held-out laydowns).
 > Coverage went to 0.76 / 0.80, inside the policy band — with no change to point accuracy.
 > The predictions were never the problem; the honesty about them was.
 
-**Comment 2 — why two optimisers**
+**Reply 2 — why two optimisers**
 
 > Why both a MILP and a GA, since people ask:
 >
@@ -164,7 +181,7 @@ held-out laydowns).
 > The GA scores candidates with the exact non-linear model, whole population in one batched
 > predict call per generation. No surrogate gap, but stochastic and no shadow prices.
 
-**Comment 3 — the finding I didn't want**
+**Reply 3 — the finding I didn't want**
 
 > The uncomfortable result: 0 of 50 optimiser blends fall inside the model's training
 > support.
@@ -182,7 +199,7 @@ held-out laydowns).
 > So the system says it out loud instead: no such blend is ever rated HIGH confidence, and
 > a human must sign it off.
 
-**Comment 4 — the gate that refused me**
+**Reply 4 — the gate that refused me**
 
 > Promotion is a command: make promote APPROVER="<name>"
 >
@@ -198,7 +215,7 @@ held-out laydowns).
 > laydowns it's 3.2%; the contamination cap costs another ~0.2. Nothing got worse. The
 > measurement got honest.
 
-**Comment 5 — code**
+**Reply 5 — code** (only if asked; the link is already in the post)
 
 > Code, governance docs and the honest limitations: https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser
 >
@@ -267,5 +284,7 @@ against the 3,000-character limit, which is the only real trade-off.
    `docs/screenshots/01_review_screen.png` — that one image carries the MEDIUM confidence
    banner, the out-of-support warning and the price-age line.
 6. Add alt text to every image.
-7. Post the comment thread immediately, in order.
-8. Reply to everything in the first two hours.
+7. Do not pre-load comments. Answer from the reply bank as questions arrive.
+8. Reply to everything in the first two hours — that hour matters more than hashtags.
+9. Message 5-10 people in your network who genuinely work on this. Real early engagement
+   is the strongest signal there is.

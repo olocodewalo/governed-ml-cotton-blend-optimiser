@@ -237,9 +237,20 @@ Better than tagging pages: tag **2-3 people** — a spinning technologist, a mil
 head, a textile-ML researcher — and put the closing question to them directly. People
 reply; company pages rarely do.
 
-**Hashtags (5-8)**
-`#TextileManufacturing #SpinningMill #CottonYarn #MachineLearning #MLOps
-#OperationsResearch #ResponsibleAI #ManufacturingAnalytics`
+**Hashtags — what actually shipped**
+
+On the post:
+`#MachineLearning #MLOps #AIGovernance #ResponsibleAI #DataScience
+#ManufacturingAnalytics #TextileIndustry #SpinningMill #CottonYarn`
+
+On the article (same plus three narrower ones):
+`#ConformalPrediction #OperationsResearch #HumanInTheLoop`
+
+Be realistic about what these buy. LinkedIn has wound hashtag-based distribution
+right down; reach now comes from the hook, dwell time and the first hour of
+engagement. The niche tags (#SpinningMill, #CottonYarn) reach a small but exactly
+right audience; the broad ones mostly signal topic. They cost nothing and count
+against the 3,000-character limit, which is the only real trade-off.
 
 ---
 

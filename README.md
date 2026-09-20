@@ -1,14 +1,42 @@
 # Cotton Blend Optimisation for Spinning Mills
 
 [![ci](https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser/actions/workflows/ci.yml/badge.svg)](https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A learning / portfolio prototype at **enterprise-grade design, prototype scale**.
+**Governed machine-learning decision support for the weekly cotton bale laydown
+in a ring-spinning mill.** A LightGBM yarn-quality model with conformal
+prediction intervals feeds a constrained cost optimiser (MILP + genetic
+algorithm); a RAG + LLM layer explains the result in plain language; the mixing
+master approves, adjusts or rejects; every decision is audited. Wrapped in the
+MLOps controls that decide whether a model is allowed to serve at all.
+
+A learning / portfolio prototype at **enterprise-grade design, prototype scale**,
+on synthetic data.
+
+![Human-in-the-loop review screen: recommended blend, predicted quality with P10-P90 intervals, confidence level and LLM rationale](docs/screenshots/01_review_screen.png)
 
 Raw cotton is 55-65% of yarn cost. Each week a mixing master decides the **bale
 laydown** -- which bales, in what proportions -- trading ₹/kg against spun-yarn
 quality and count consistency. Today that lives in one expert's head and a
 spreadsheet, is not re-optimised as prices move, and leaves no record of why a
 blend was chosen.
+
+### What this repo demonstrates
+
+- **Uncertainty that is actually calibrated.** 5-fold conformalized quantile
+  regression, because raw quantile heads on 400 rows come out too narrow -- and
+  the auto-suggest gate keys on the P10.
+- **An optimiser that cannot cheat.** Quality as a hard constraint, a
+  price-freshness guard, and a contamination cap on risky origins. Without that
+  cap the LP took 54.6% of one blend from a single origin.
+- **A promotion gate with teeth.** Training produces a *candidate*; acceptance
+  thresholds and a regression suite decide whether it may serve, and a named
+  human must sign off. It refused this repo's own model until a reason was recorded.
+- **Honest measurement.** Every headline number carries a 95% interval, and the
+  write-up explains why the first version's 6.4% saving became 3.0%.
+- **A finding kept rather than hidden.** 0 of 50 optimiser blends fall inside the
+  model's training support, so none is ever rated HIGH confidence.
 
 This repo builds the decision-support system around that choice:
 

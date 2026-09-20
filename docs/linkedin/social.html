@@ -1,0 +1,33 @@
+<title>Social preview</title>
+<style>
+  :root { --ink: #10201a; --muted: #4d6359; --line: #d7e2db; --paper: #f7faf8; --accent: #0f7a52; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #223; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  /* GitHub social preview: 1280x640, safe area ~1200x600 */
+  .social {
+    width: 1280px; height: 640px; background: var(--paper); color: var(--ink);
+    padding: 62px 70px 54px; display: flex; flex-direction: column;
+  }
+  .kicker { font-size: 21px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 62px; line-height: 1.07; margin: 20px 0 0; letter-spacing: -.02em; max-width: 1080px; }
+  .sub { font-size: 25px; line-height: 1.45; color: var(--muted); margin-top: 22px; max-width: 1050px; }
+  .strip { margin-top: auto; display: flex; gap: 18px; }
+  .cell { flex: 1; border: 2px solid var(--line); border-radius: 14px; background: #fff; padding: 18px 20px; }
+  .cell .n { font-size: 30px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+  .cell .l { font-size: 16px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .by { margin-top: 22px; font-size: 19px; color: var(--muted); display: flex; justify-content: space-between; }
+</style>
+<div class="social">
+  <div class="kicker">Prototype on synthetic data</div>
+  <h1>Cotton blend optimisation,<br>governed end to end.</h1>
+  <div class="sub">ML quality model with conformal intervals → MILP + GA cost optimiser → RAG
+    explanation → human sign-off → audit trail. Plus the promotion gate, drift monitor and
+    regression suite that keep it honest.</div>
+  <div class="strip">
+    <div class="cell"><div class="n">3.0%</div><div class="l">saving at matched quality (95% CI 0.8–5.5%)</div></div>
+    <div class="cell"><div class="n">0.90</div><div class="l">optimiser blends land in the spec band</div></div>
+    <div class="cell"><div class="n">0.02</div><div class="l">false-accept rate on the golden set</div></div>
+    <div class="cell"><div class="n">40</div><div class="l">tests, green in CI on every push</div></div>
+  </div>
+  <div class="by"><span>LightGBM · conformal prediction · PuLP/CBC · DEAP · RAG · Streamlit</span><span>github.com/olocodewalo</span></div>
+</div>

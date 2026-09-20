@@ -24,12 +24,15 @@ def main() -> None:
         for i in range(slides.count()):
             slides.nth(i).screenshot(path=OUT / f"slide_{i + 1}.png")
 
-        cover = b.new_page()
-        cover.set_viewport_size({"width": 1920, "height": 1080})
-        cover.goto(HERE.joinpath("cover.html").as_uri(), wait_until="networkidle")
-        cover.locator(".cover").screenshot(path=OUT / "article_cover.png")
+        for name, sel, w, h, out in (
+                ("cover.html", ".cover", 1920, 1080, "article_cover.png"),
+                ("social.html", ".social", 1280, 640, "social_preview.png")):
+            page2 = b.new_page()
+            page2.set_viewport_size({"width": w, "height": h})
+            page2.goto(HERE.joinpath(name).as_uri(), wait_until="networkidle")
+            page2.locator(sel).screenshot(path=OUT / out)
         b.close()
-    print(f"wrote {len(list(OUT.glob('slide_*.png')))} slides + article_cover.png -> {OUT}")
+    print(f"wrote {len(list(OUT.glob('slide_*.png')))} slides + article_cover.png + social_preview.png -> {OUT}")
 
 
 if __name__ == "__main__":

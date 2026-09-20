@@ -1,0 +1,286 @@
+TITLE (<=100 chars, paste into the article title field):
+I built a cotton blend optimiser, then audited it until the headline number halved
+
+HOW TO USE: paste everything below the line into LinkedIn's article editor.
+Lines marked [H2]/[H3] are headings -- delete the marker and apply the heading
+style. Lines marked [IMAGE: ...] are where to upload that file.
+==============================================================================
+
+A governed ML decision system for the weekly bale laydown in a spinning mill — every
+technical choice, and why. Prototype on synthetic data.
+
+[H2] The decision this system supports
+
+In a ring-spinning mill, raw cotton is 55-65% of the cost of the yarn. Everything else
+— power, labour, depreciation, packing — fights over the remaining third. So the single
+most expensive recurring decision in the plant is not a machine setting. It is the
+bale laydown: which bales from the godown go into this week's mixing, and in what
+proportion.
+
+The mixing master balances four things at once:
+
+1. Cost. Bales differ in ₹/kg by origin, grade and lot.
+2. Quality. The spun yarn must hit the count's spec band — CSP (count-strength
+   product), U% (evenness), imperfections (neps + thick/thin places), ends-down
+   (breaks per 100 spindle hours).
+3. Consistency. The blend's fibre profile must stay close to the rolling average of
+   recent laydowns, or the yarn count and dye affinity wander between lots.
+4. Risk. Contamination — polypropylene, jute, hair — travels with certain origins and
+   cannot be cleaned out downstream. It shows up after dyeing, in the customer's fabric.
+
+India runs one of the world's largest installed spinning capacities, and the counts in
+this prototype (20s, 30s, 40s, 60s Ne, ring-spun cotton) are the workhorse range for it.
+In most mills this decision lives in one experienced person's head plus a spreadsheet. It
+is rarely re-optimised when cotton prices move mid-week, and it leaves no record of why
+a blend was chosen — so when a lot goes bad, nobody can reconstruct the reasoning, and
+when the mixing master retires, the reasoning leaves with them.
+
+That last point is what makes this an ML systems problem rather than a modelling
+exercise. The value is not only a cheaper blend. It is a decision that can be inspected.
+
+[H2] Why machine learning earns its place here
+
+Most "AI in manufacturing" demos would be better as a spreadsheet. This one would not,
+and the reason is specific: yarn quality is non-linear in the blend's aggregate fibre
+profile.
+
+• Short-fibre content (SFC) penalises strength and evenness with an exponent greater
+  than 1. A blend at 13% SFC is much worse than twice as bad as one at 9%.
+• Micronaire variance across the blend — mixing coarse and fine fibre — hurts
+  evenness and neps super-linearly, independently of the mean micronaire. Two blends
+  with identical average micronaire can spin very differently.
+• Neps come from both immature fibre (low micronaire) and short fibre, and the two
+  interact multiplicatively.
+
+A linear cost rule cannot see any of this. Neither can a lookup table, because the
+interactions live in a continuous space. A model that learns the response surface from
+historical laydowns can — and, importantly, it can be wrong in measurable ways, which
+is what makes governance possible.
+
+In this prototype the ground truth is a hand-written physics surrogate
+(data/quality_physics.py) encoding those non-linearities. The generator uses it to label
+500 synthetic historical laydowns; the ML model never sees the formula and must learn to
+approximate it; the eval harness scores the model against it. In a real mill, that
+surrogate is replaced by a model trained on linked HVI/AFIS bale tests and spun-yarn QC —
+which is why the 90-day plan treats data readiness as the real blocker, not modelling.
+
+[H2] Architecture
+
+[IMAGE: slides/slide_4.png — the architecture diagram]
+
+[H2] Every technical choice, and why
+
+[H3] Feature engineering — the blend profile
+
+A laydown is 30-45 bales with weights. The model does not see bales; it sees the
+weighted aggregate profile: weighted means of the seven fibre properties, weighted
+variances of micronaire and SFC, origin fractions, and an effective bale count
+(inverse Herfindahl, 1 / Σw²).
+
+• Why variances as explicit features: the physics depends on spread, not just average.
+  A model given only means literally cannot represent the effect.
+• Why effective bale count: it distinguishes "45 bales, evenly spread" from "45 bales,
+  four of which are 80% of the mixing" — very different in practice.
+• Why one shared function: data/features.py is called by the data generator, the
+  training pipeline, both optimisers and the app. Train/serve skew is one of the most
+  common silent failures in deployed ML, and the cheapest way to prevent it is to make it
+  structurally impossible.
+
+[H3] The quality model — LightGBM, four targets, twelve heads
+
+• Why gradient-boosted trees: ~400 training laydowns, 15 tabular features, strong
+  interactions. This is exactly the regime where GBMs beat both linear models and neural
+  networks. A deep net here would memorise.
+• Why LightGBM specifically: fast on small data, native quantile objective (needed for
+  the intervals), and SHAP support — the SHAP chart is part of the governance pack because
+  a mixing master will ask "why does it want more Pima?"
+• Why multi-output as separate models: CSP, U%, imperfections and ends-down have
+  different scales and different error structures. Three heads per target (mean, P10, P90)
+  × four targets = twelve models, trained in seconds.
+• Why a chronological split: the test set is the newest laydowns. A random split would
+  leak time structure and flatter the model.
+
+[H3] Uncertainty — and why it decides everything downstream
+
+The model outputs P10-P90 bands, not just point estimates. This is not decoration:
+the confidence policy gates on the P10. A blend whose mean CSP clears the floor but
+whose P10 does not is roughly a one-in-ten chance of shipping out-of-spec yarn.
+
+Raw LightGBM quantile heads on 400 rows over-fit and produce bands that are too narrow
+— and a too-narrow band is worse than no band, because it manufactures false confidence in
+exactly the gate that is supposed to catch risk. My first version tried a multiplicative
+widening factor and still under-covered: imperfections at 0.67 and ends-down at 0.68,
+against a policy that demanded 0.70-0.90.
+
+The fix is 5-fold cross-conformalized quantile regression (CQR): train the quantile
+heads on out-of-fold data, compute conformity scores max(lo − y, y − hi), take the
+finite-sample-corrected quantile of those scores, and widen the band additively by it.
+Under exchangeability this gives a distribution-free coverage guarantee. Coverage moved to
+0.76 and 0.80, inside the policy band, without changing point accuracy at all — the
+bands were the problem, not the predictions.
+
+[H3] The optimiser — why two of them
+
+The objective is: minimise blend ₹/kg, subject to predicted quality inside the spec band,
+fibre profile within drift limits of the rolling 30-laydown average, per-bale share cap,
+bale-count window, and origin caps.
+
+MILP (PuLP + CBC). Continuous weights w_i, binary y_i for "bale used",
+cardinality via Σy_i ≤ 45.
+• Why it cannot use the real model: the quality function depends on weighted
+  variances, which are quadratic in w. Not expressible in a linear program. So the LP
+  optimises against an OLS surrogate fitted on only the linear-in-w features.
+• Why that is acceptable: the surrogate gap is handled explicitly. The LP solves, the
+  full ML model re-scores the result, and if it fell outside the band the safety
+  margins inflate and it re-solves — up to four rounds. The gap is exposed, not hidden.
+• Why an LP at all: ~1-3 seconds, globally optimal against the surrogate, deterministic
+  (so the regression harness is reproducible), and it yields shadow prices — "which
+  constraint is costing me the most" is a question a plant manager actually asks.
+
+Genetic algorithm (DEAP).
+• Why: it scores candidates with the exact non-linear model the mixing master will
+  see. No surrogate gap. It can handle constraints an LP cannot express — P10 floors,
+  variance penalties.
+• How it stays tractable: the entire population is scored in one batched
+  model.predict call per generation. Tournament selection, uniform crossover, a
+  sparsify/jitter mutation, elitist merge.
+• Cost: slower, stochastic (seeded), only near-optimal, no shadow prices.
+
+In practice: LP first for a fast explainable point, GA to polish against the full
+model. The UI shows both.
+
+[H3] Guards the optimiser cannot bypass
+
+An optimiser is a machine for finding the cheapest corner of whatever space you give it.
+Two of those corners are unacceptable regardless of price:
+
+• Stale prices. If the price sheet is a fortnight old, the optimiser is minimising
+  against fiction. It now refuses to run on bale prices older than 7 days at the planning
+  date. A data contract enforced in code, not in a document.
+• Contamination-prone origins. Some origins carry a real contamination risk that no
+  amount of cleaning removes, so mills cap their share regardless of price. Before this
+  cap existed, my optimiser put 54.6% of a 20s blend into exactly that origin — the
+  single most convincing demonstration in the whole project that constraints belong in
+  code.
+
+[H3] The out-of-support check — the finding I did not want
+
+A cheap in-band blend is, almost by definition, unlike anything in the training data:
+it concentrates on cheap bales and unusual origin mixes. So I measure it. For a candidate
+blend, take the mean distance to its 5 nearest training laydowns in standardised feature
+space, divided by the 99th percentile of that same distance within the training set.
+Ratio > 1 means the model is extrapolating.
+
+• Why kNN and not Mahalanobis: the features are correlated and distinctly non-Gaussian
+  (origin fractions are bounded, variances are skewed). kNN distance makes no distributional
+  assumption and needs no covariance inversion on 400 rows.
+
+Result: 0 of 50 optimiser blends are inside training support. I tried the obvious fix
+— force blends to look more historical by tightening the per-bale cap to 6%. It cut the
+in-band rate from 0.90 to 0.82 and the saving to roughly zero, while lifting in-support
+blends only to 8%. A bad trade, so I reverted it and kept the measurement. The system now
+refuses to rate any such blend HIGH confidence, which makes human review mandatory —
+the honest response to a model being asked to extrapolate.
+
+[H3] RAG and the LLM — deliberately off the decision path
+
+This is not a generative-AI use case, and pretending otherwise would be the tell.
+
+• RAG: 18 hand-written fibre-science notes. The retriever tries a local
+  sentence-transformers model and falls back to TF-IDF cosine when it is unavailable — so
+  the pipeline runs on a mill VM with no GPU and no model download. The query is built
+  from the run itself: yarn count, binding constraints, blend micronaire spread, SFC.
+• LLM: Claude writes a 4-6 sentence rationale grounded in the retrieved notes and the
+  run's numbers. It never computes or changes a number. With no API key, a
+  deterministic templated rationale is used and the UI labels it as such, so the pipeline
+  never blocks on a third-party service.
+• Why so constrained: the rationale is for trust-building and knowledge capture. The
+  moment an LLM is on the decision path, the decision stops being reproducible — and every
+  governance control in this project depends on reproducibility.
+• No agents. A weekly blend must be deterministic and auditable. If an agentic layer is
+  ever added, it belongs above these deterministic tools — a what-if assistant that calls
+  run_optimiser / compare_scenarios and never invents numbers itself.
+
+[H3] Governance — the part that actually changed the outcome
+
+• Model registry (plain JSON, human-readable): every model ever proposed, its metrics,
+  status (candidate / approved / retired), approver, timestamp, CAB note.
+• Training produces a candidate only. Earlier, training silently overwrote the
+  "current" pointer, meaning an unapproved model was serving. Now the app and both
+  optimisers refuse to start without an approved model.
+• Promotion gate (make promote APPROVER="<name>"): acceptance thresholds first
+  (not overridable — false-accept rate is the hard gate, because shipping out-of-spec
+  yarn costs more than any cotton saving), then the regression suite. A regression can be
+  accepted only with a recorded reason from a named human, written into the registry.
+  It refused my own promotion until I wrote that reason.
+• Golden set: the 50 newest laydowns, never trained on, with ground-truth physics for
+  decision metrics.
+• Drift monitor: PSI per key feature against a training-distribution snapshot stored
+  inside the model artifact, rolling MAE vs the model's own golden MAE, logged master
+  corrections, and unseen origins. (The PSI window is 100 laydowns deliberately: PSI has a
+  sampling floor of roughly (bins−1)/n, so a small window would alarm on noise.)
+• CI: data → train → golden set → regression gate → tests, on every push.
+• Audit log: every recommendation and decision, with confidence level and the reasons
+  behind it, in SQLite.
+
+[H3] Testing strategy
+
+40 tests, and they are not accuracy assertions:
+
+• Property tests on the physics: the SFC penalty must accelerate; micronaire variance
+  must hurt evenness. These encode domain claims, so a careless edit to the ground truth
+  fails loudly.
+• Invariance tests: scaling all weights by 7 must not change the blend profile.
+• Constraint tests: LP output must respect the cardinality, drift and origin-cap
+  constraints; both optimisers must refuse stale prices.
+• Governance tests: promotion must refuse a threshold failure even with a CAB reason,
+  must refuse a regression without one, and must retire the previous approved model.
+• Drift tests: quiet on historical data, fires on a simulated crop-year shift.
+
+[H2] Results, and how they shrank
+
+Golden set: 50 held-out laydowns, model v2.
+
+• CSP MAE / label-noise floor — Result: 22.9 / 28; Gate: ≤ 35
+• P10-P90 coverage (CSP / U% / IPI / ends) — Result: 0.86 / 0.86 / 0.76 / 0.80; Gate: 0.70-0.90
+• Decision agreement with ground truth — Result: 0.94; Gate: ≥ 0.90
+• False-accept rate — Result: 0.02; Gate: ≤ 0.05
+• Optimiser lands in spec band — Result: 0.90 (95% CI 0.79-0.96); Gate: ≥ 0.90
+• Saving at strictly matched quality — Result: 3.0% (95% CI 0.8-5.5%, n=35); Gate: 1-4% planning range
+• Blends inside training support — Result: 0 of 50; Gate: —
+
+Where the old 6.4% went. It was measured on a 15-scenario sample with 11 matched
+cases. Re-run on all 50 golden laydowns with the same optimiser, it is 3.2%. Adding the
+contamination cap costs a further ~0.2 points. Nothing about the model got worse; the
+measurement got honest. A small sample plus a favourable configuration is how most
+portfolio projects — and a fair number of vendor decks — produce impressive numbers.
+
+[H2] Honest limitations
+
+• Synthetic data throughout. The physics surrogate is directionally right, not a mill.
+• Every optimiser blend is out of training support. Mitigated by mandatory human review,
+  not solved.
+• The in-band rate sits exactly on its 0.90 threshold; its interval reaches down to 0.79.
+• The LLM layer is the least-governed part: the prompt forbids inventing figures, but
+  nothing yet verifies that the numbers in the rationale match the run. That check — and
+  hashing the prompt and knowledge base into the audit log — is the next thing I will build.
+• Single plant, four counts, no machine integration, no price forecasting.
+
+[H2] Stack
+
+• Data — Tool: pandas, pyarrow, Parquet; Why this one: Columnar, typed, reproducible; laydowns carry list-valued bale IDs
+• Model — Tool: LightGBM; Why this one: Small tabular data with interactions; native quantile objective; SHAP
+• Uncertainty — Tool: scikit-learn (KFold) + custom CQR; Why this one: Distribution-free coverage on 400 rows
+• Support / drift — Tool: scikit-learn NearestNeighbors, PSI; Why this one: No distributional assumptions
+• MILP — Tool: PuLP + CBC; Why this one: Free, deterministic, shadow prices
+• Metaheuristic — Tool: DEAP; Why this one: Optimises against the full non-linear model
+• Retrieval — Tool: sentence-transformers → TF-IDF fallback; Why this one: Runs with or without a GPU/model download
+• LLM — Tool: Claude (Anthropic SDK); Why this one: Rationale only; templated fallback keeps the pipeline offline-safe
+• App — Tool: Streamlit; Why this one: One-screen review is the whole HITL requirement
+• Audit — Tool: SQLite; Why this one: Append-only in practice, zero ops
+• CI — Tool: GitHub Actions; Why this one: The regression gate has to run somewhere
+• Docs — Tool: Playwright; Why this one: Screenshots and carousel regenerate from code
+
+Prototype on synthetic data. It demonstrates the shape of a governed ML decision system
+for mill blending — not a validated result from any mill. Code, governance docs and the
+full limitations are in the repository.

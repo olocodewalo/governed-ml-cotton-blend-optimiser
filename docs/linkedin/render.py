@@ -1,4 +1,4 @@
-"""Render docs/linkedin/carousel.html to one PNG per slide (1080x1350, LinkedIn carousel).
+"""Render the carousel (1080x1350 per slide) and the article cover (1920x1080).
 
     python docs/linkedin/render.py
 """
@@ -23,8 +23,13 @@ def main() -> None:
         slides = page.locator(".slide")
         for i in range(slides.count()):
             slides.nth(i).screenshot(path=OUT / f"slide_{i + 1}.png")
+
+        cover = b.new_page()
+        cover.set_viewport_size({"width": 1920, "height": 1080})
+        cover.goto(HERE.joinpath("cover.html").as_uri(), wait_until="networkidle")
+        cover.locator(".cover").screenshot(path=OUT / "article_cover.png")
         b.close()
-    print(f"wrote {len(list(OUT.glob('slide_*.png')))} slides -> {OUT}")
+    print(f"wrote {len(list(OUT.glob('slide_*.png')))} slides + article_cover.png -> {OUT}")
 
 
 if __name__ == "__main__":

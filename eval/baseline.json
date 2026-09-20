@@ -4,38 +4,75 @@
     "csp": {
       "mae": 22.923,
       "rmse": 28.756,
-      "pi_coverage": 0.82
+      "pi_coverage": 0.86,
+      "pi_coverage_ci95": [
+        0.738,
+        0.93
+      ]
     },
     "u_pct": {
       "mae": 0.14,
       "rmse": 0.169,
-      "pi_coverage": 0.8
+      "pi_coverage": 0.86,
+      "pi_coverage_ci95": [
+        0.738,
+        0.93
+      ]
     },
     "imperfections": {
       "mae": 17.33,
       "rmse": 20.014,
-      "pi_coverage": 0.72
+      "pi_coverage": 0.76,
+      "pi_coverage_ci95": [
+        0.626,
+        0.857
+      ]
     },
     "ends_down": {
       "mae": 0.463,
       "rmse": 0.584,
-      "pi_coverage": 0.68
+      "pi_coverage": 0.8,
+      "pi_coverage_ci95": [
+        0.67,
+        0.888
+      ]
     }
   },
   "decision": {
     "n": 50,
     "agreement": 0.94,
     "false_accept_rate": 0.02,
+    "false_accept_ci95": [
+      0.004,
+      0.105
+    ],
     "false_reject_rate": 0.04
   },
   "optimiser": {
-    "n": 15,
-    "mean_cost_saving_pct_vs_historical": 18.6,
-    "median_cost_saving_pct_vs_historical": 19.01,
-    "mean_cost_saving_pct_at_matched_quality": 6.42,
-    "n_matched": 11,
-    "optimiser_blend_in_band_rate": 0.933,
-    "historical_blend_in_band_rate": 0.733
+    "n": 50,
+    "mean_cost_saving_pct_vs_historical": 15.95,
+    "mean_cost_saving_pct_vs_historical_ci95": [
+      13.31,
+      18.45
+    ],
+    "median_cost_saving_pct_vs_historical": 17.44,
+    "mean_cost_saving_pct_at_matched_quality": 3.02,
+    "mean_cost_saving_pct_at_matched_quality_ci95": [
+      0.75,
+      5.54
+    ],
+    "n_matched": 35,
+    "optimiser_blend_in_band_rate": 0.9,
+    "optimiser_blend_in_band_ci95": [
+      0.786,
+      0.957
+    ],
+    "historical_blend_in_band_rate": 0.72,
+    "optimiser_blend_in_support_rate": 0.0
   },
-  "model_version": "v1"
+  "model_version": "v2",
+  "policy": {
+    "passes": true,
+    "failures": []
+  }
 }

@@ -309,6 +309,14 @@ portfolio projects — and a fair number of vendor decks — produce impressive 
 
 ---
 
+**Code, governance docs and the full limitations:** XXXX-GITHUB-LINK
+
+Everything above regenerates from the repo: `make data && make train && make eval` rebuilds
+the dataset, the model and every number in the results table. `eval/baseline.json` is the
+frozen baseline the regression gate checks each change against.
+
 *Prototype on synthetic data. It demonstrates the shape of a governed ML decision system
-for mill blending — not a validated result from any mill. Code, governance docs and the
-full limitations are in the repository.*
+for mill blending — not a validated result from any mill.*
+
+*If you run blending in a mill, I would genuinely like to know: what would you need to see
+before letting a system like this influence a real laydown?*

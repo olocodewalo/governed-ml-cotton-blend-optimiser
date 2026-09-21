@@ -97,7 +97,7 @@ held-out laydowns).
 > Full write-up — feature design, why LightGBM over a neural net, the conformal fix, MILP
 > vs GA, the guards, why the LLM stays off the decision path, and the gate that refused my
 > own model:
-> https://www.linkedin.com/pulse/i-built-cotton-blend-optimiser-audited-until-headline-ankit-agrawal-qxecf/
+> https://www.linkedin.com/pulse/i-built-cotton-blend-optimiser-audited-until-headline-ankit-agrawal-ss5if/
 >
 > Code: https://github.com/olocodewalo/governed-ml-cotton-blend-optimiser
 >
@@ -128,7 +128,7 @@ held-out laydowns).
 >
 > Prototype on synthetic data — the point is the governance, not the number.
 >
-> Full write-up: https://www.linkedin.com/pulse/i-built-cotton-blend-optimiser-audited-until-headline-ankit-agrawal-qxecf/
+> Full write-up: https://www.linkedin.com/pulse/i-built-cotton-blend-optimiser-audited-until-headline-ankit-agrawal-ss5if/
 
 ---
 

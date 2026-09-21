@@ -320,3 +320,5 @@ for mill blending — not a validated result from any mill.*
 
 *If you run blending in a mill, I would genuinely like to know: what would you need to see
 before letting a system like this influence a real laydown?*
+
+#MachineLearning #MLOps #AIGovernance #ResponsibleAI #ConformalPrediction #OperationsResearch #DataScience #ManufacturingAnalytics #TextileIndustry #SpinningMill #CottonYarn #HumanInTheLoop

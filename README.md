@@ -14,6 +14,11 @@ MLOps controls that decide whether a model is allowed to serve at all.
 A learning / portfolio prototype at **enterprise-grade design, prototype scale**,
 on synthetic data.
 
+📖 **Full write-up:** [I built a cotton blend optimiser, then audited it until the
+headline number halved](https://www.linkedin.com/pulse/i-built-cotton-blend-optimiser-audited-until-headline-ankit-agrawal-ss5if/)
+— every design choice and why, including the five governance gaps the audit found.
+The same article is in this repo as [docs/linkedin/article.md](docs/linkedin/article.md).
+
 ![Human-in-the-loop review screen: recommended blend, predicted quality with P10-P90 intervals, confidence level and LLM rationale](docs/screenshots/01_review_screen.png)
 
 Raw cotton is 55-65% of yarn cost. Each week a mixing master decides the **bale
